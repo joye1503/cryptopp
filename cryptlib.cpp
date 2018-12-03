@@ -321,7 +321,7 @@ void RandomNumberGenerator::DiscardBytes(size_t n)
 	GenerateIntoBufferedTransformation(TheBitBucket(), DEFAULT_CHANNEL, n);
 }
 
-void RandomNumberGenerator::GenerateIntoBufferedTransformation(BufferedTransformation &target, const std::string &channel, lword length)
+void RandomNumberGenerator::GenerateIntoBufferedTransformation(BufferedTransformation &target, ChannelId channel, lword length)
 {
 	FixedSizeSecBlock<byte, 256> buffer;
 	while (length)
@@ -382,7 +382,7 @@ public:
 
 #if defined(CRYPTOPP_DOXYGEN_PROCESSING)
 	/// \brief An implementation that throws NotImplemented
-	void GenerateIntoBufferedTransformation (BufferedTransformation &target, const std::string &channel, lword length) {}
+	void GenerateIntoBufferedTransformation (BufferedTransformation &target, ChannelId channel, lword length) {}
 	/// \brief An implementation that throws NotImplemented
 	void IncorporateEntropy (const byte *input, size_t length) {}
 	/// \brief An implementation that returns \p false
@@ -451,50 +451,50 @@ bool BufferedTransformation::MessageSeriesEnd(int propagation, bool blocking)
 	return IsolatedMessageSeriesEnd(blocking);
 }
 
-byte * BufferedTransformation::ChannelCreatePutSpace(const std::string &channel, size_t &size)
+byte * BufferedTransformation::ChannelCreatePutSpace(ChannelId channel, size_t &size)
 {
 	byte* space = NULLPTR;
-	if (channel.empty())
+	if (IsDefaultChannel(channel))
 		space = CreatePutSpace(size);
 	else
 		throw NoChannelSupport(AlgorithmName());
 	return space;
 }
 
-size_t BufferedTransformation::ChannelPut2(const std::string &channel, const byte *inString, size_t length, int messageEnd, bool blocking)
+size_t BufferedTransformation::ChannelPut2(ChannelId channel, const byte *inString, size_t length, int messageEnd, bool blocking)
 {
 	size_t size = 0;
-	if (channel.empty())
+	if (IsDefaultChannel(channel))
 		size = Put2(inString, length, messageEnd, blocking);
 	else
 		throw NoChannelSupport(AlgorithmName());
 	return size;
 }
 
-size_t BufferedTransformation::ChannelPutModifiable2(const std::string &channel, byte *inString, size_t length, int messageEnd, bool blocking)
+size_t BufferedTransformation::ChannelPutModifiable2(ChannelId channel, byte *inString, size_t length, int messageEnd, bool blocking)
 {
 	size_t size = 0;
-	if (channel.empty())
+	if (IsDefaultChannel(channel))
 		size = PutModifiable2(inString, length, messageEnd, blocking);
 	else
 		size = ChannelPut2(channel, inString, length, messageEnd, blocking);
 	return size;
 }
 
-bool BufferedTransformation::ChannelFlush(const std::string &channel, bool hardFlush, int propagation, bool blocking)
+bool BufferedTransformation::ChannelFlush(ChannelId channel, bool hardFlush, int propagation, bool blocking)
 {
 	bool result = 0;
-	if (channel.empty())
+	if (IsDefaultChannel(channel))
 		result = Flush(hardFlush, propagation, blocking);
 	else
 		throw NoChannelSupport(AlgorithmName());
 	return result;
 }
 
-bool BufferedTransformation::ChannelMessageSeriesEnd(const std::string &channel, int propagation, bool blocking)
+bool BufferedTransformation::ChannelMessageSeriesEnd(ChannelId channel, int propagation, bool blocking)
 {
 	bool result = false;
-	if (channel.empty())
+	if (IsDefaultChannel(channel))
 		result = MessageSeriesEnd(propagation, blocking);
 	else
 		throw NoChannelSupport(AlgorithmName());
@@ -632,7 +632,7 @@ unsigned int BufferedTransformation::SkipMessages(unsigned int count)
 	return size;
 }
 
-size_t BufferedTransformation::TransferMessagesTo2(BufferedTransformation &target, unsigned int &messageCount, const std::string &channel, bool blocking)
+size_t BufferedTransformation::TransferMessagesTo2(BufferedTransformation &target, unsigned int &messageCount, ChannelId channel, bool blocking)
 {
 	if (AttachedTransformation())
 		return AttachedTransformation()->TransferMessagesTo2(target, messageCount, channel, blocking);
@@ -662,7 +662,7 @@ size_t BufferedTransformation::TransferMessagesTo2(BufferedTransformation &targe
 	}
 }
 
-unsigned int BufferedTransformation::CopyMessagesTo(BufferedTransformation &target, unsigned int count, const std::string &channel) const
+unsigned int BufferedTransformation::CopyMessagesTo(BufferedTransformation &target, unsigned int count, ChannelId channel) const
 {
 	unsigned int size = 0;
 	if (AttachedTransformation())
@@ -681,7 +681,7 @@ void BufferedTransformation::SkipAll()
 	}
 }
 
-size_t BufferedTransformation::TransferAllTo2(BufferedTransformation &target, const std::string &channel, bool blocking)
+size_t BufferedTransformation::TransferAllTo2(BufferedTransformation &target, ChannelId channel, bool blocking)
 {
 	if (AttachedTransformation())
 		return AttachedTransformation()->TransferAllTo2(target, channel, blocking);
@@ -713,7 +713,7 @@ size_t BufferedTransformation::TransferAllTo2(BufferedTransformation &target, co
 	}
 }
 
-void BufferedTransformation::CopyAllTo(BufferedTransformation &target, const std::string &channel) const
+void BufferedTransformation::CopyAllTo(BufferedTransformation &target, ChannelId channel) const
 {
 	if (AttachedTransformation())
 		AttachedTransformation()->CopyAllTo(target, channel);
@@ -724,19 +724,19 @@ void BufferedTransformation::CopyAllTo(BufferedTransformation &target, const std
 	}
 }
 
-void BufferedTransformation::SetRetrievalChannel(const std::string &channel)
+void BufferedTransformation::SetRetrievalChannel(ChannelId channel)
 {
 	if (AttachedTransformation())
 		AttachedTransformation()->SetRetrievalChannel(channel);
 }
 
-size_t BufferedTransformation::ChannelPutWord16(const std::string &channel, word16 value, ByteOrder order, bool blocking)
+size_t BufferedTransformation::ChannelPutWord16(ChannelId channel, word16 value, ByteOrder order, bool blocking)
 {
 	PutWord(false, order, m_buf, value);
 	return ChannelPut(channel, m_buf, 2, blocking);
 }
 
-size_t BufferedTransformation::ChannelPutWord32(const std::string &channel, word32 value, ByteOrder order, bool blocking)
+size_t BufferedTransformation::ChannelPutWord32(ChannelId channel, word32 value, ByteOrder order, bool blocking)
 {
 	PutWord(false, order, m_buf, value);
 	return ChannelPut(channel, m_buf, 4, blocking);

@@ -92,7 +92,7 @@ X917RNG::X917RNG(BlockTransformation *c, const byte *seed, const byte *determini
 	X917RNG::GenerateIntoBufferedTransformation(target, DEFAULT_CHANNEL, m_size);
 }
 
-void X917RNG::GenerateIntoBufferedTransformation(BufferedTransformation &target, const std::string &channel, lword size)
+void X917RNG::GenerateIntoBufferedTransformation(BufferedTransformation &target, ChannelId channel, lword size)
 {
 	while (size > 0)
 	{

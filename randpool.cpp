@@ -38,7 +38,7 @@ void RandomPool::IncorporateEntropy(const byte *input, size_t length)
 	m_keySet = false;
 }
 
-void RandomPool::GenerateIntoBufferedTransformation(BufferedTransformation &target, const std::string &channel, lword size)
+void RandomPool::GenerateIntoBufferedTransformation(BufferedTransformation &target, ChannelId channel, lword size)
 {
 	if (size > 0)
 	{
@@ -120,7 +120,7 @@ void OldRandomPool::Stir()
 	getPos = key.size();
 }
 
-void OldRandomPool::GenerateIntoBufferedTransformation(BufferedTransformation &target, const std::string &channel, lword size)
+void OldRandomPool::GenerateIntoBufferedTransformation(BufferedTransformation &target, ChannelId channel, lword size)
 {
 	while (size > 0)
 	{

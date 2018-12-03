@@ -152,7 +152,7 @@ void RawIDA::ComputeV(unsigned int i)
 void RawIDA::AddOutputChannel(word32 channelId)
 {
 	m_outputChannelIds.push_back(channelId);
-	m_outputChannelIdStrings.push_back(WordToString(channelId));
+	m_outputChannelIdStrings.push_back((ChannelId)channelId);
 	m_outputQueues.push_back(ByteQueue());
 	if (m_inputChannelIds.size() == size_t(m_threshold))
 		ComputeV((unsigned int)m_outputChannelIds.size() - 1);
@@ -222,7 +222,7 @@ void RawIDA::ProcessInputQueues()
 		for (i=0; i<size_t(m_threshold); i++)
 		{
 			inputQueues[i].GetNextMessage();
-			inputQueues[i].TransferAllTo(*AttachedTransformation(), WordToString(inputChannelIds[i]));
+			inputQueues[i].TransferAllTo(*AttachedTransformation(), (ChannelId)inputChannelIds[i]);
 		}
 	}
 }

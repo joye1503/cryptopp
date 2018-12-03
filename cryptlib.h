@@ -490,22 +490,41 @@ public:
 // User programs should use g_nullNameValuePairs rather than s_nullNameValuePairs.
 static const NullNameValuePairs s_nullNameValuePairs;
 
+enum ChannelId {
+	/// \brief Default channel for data
+    DEFAULT_CHANNEL = -1,
+	/// \brief Channel for additional authenticated data
+    AAD_CHANNEL = -2,
+	/// \brief Discard channel
+    NULL_CHANNEL = -3,
+
+	/// \brief Channel 0
+	/// \details CHANNEL0 is used by EqualityComparisonFilter
+	CHANNEL0 = 0,
+	/// \brief Channel 1
+	/// \details CHANNEL1 is used by EqualityComparisonFilter
+	CHANNEL1 = 1
+};
+
+inline bool IsDefaultChannel(ChannelId channel)
+{
+	return channel == DEFAULT_CHANNEL;
+}
+
+inline std::string ChannelToName(ChannelId channel)
+{
+	if (channel == DEFAULT_CHANNEL)
+		return "default";
+	else if (channel == AAD_CHANNEL)
+		return "aad";
+	else if (channel == 0)
+		return "null";
+	else
+		return "unknown";
+}
+
 // Doxygen cannot handle initialization
 #if CRYPTOPP_DOXYGEN_PROCESSING
-/// \brief Default channel for BufferedTransformation
-/// \details DEFAULT_CHANNEL is equal to an empty string
-/// \details Crypto++ 6.0 placed DEFAULT_CHANNEL in the header, rather than declaring it as extern and
-///   placing the definition in the source file. As an external definition the string DEFAULT_CHANNEL
-///   was subject to static initialization order fiasco problems.
-const std::string DEFAULT_CHANNEL;
-
-/// \brief Channel for additional authenticated data
-/// \details AAD_CHANNEL is equal to "AAD"
-/// \details Crypto++ 6.0 placed AAD_CHANNEL in the header, rather than declaring it as extern and
-///   placing the definition in the source file. As an external definition the string AAD_CHANNEL
-///   was subject to static initialization order fiasco problems.
-const std::string AAD_CHANNEL;
-
 /// \brief An empty set of name-value pairs
 /// \details Crypto++ 6.0 placed g_nullNameValuePairs in the header, rather than declaring it as extern
 ///   and placing the definition in the source file. As an external definition the g_nullNameValuePairs
@@ -514,16 +533,12 @@ const NameValuePairs g_nullNameValuePairs;
 
 // Sun Studio 12.3 and earlier can't handle NameValuePairs initialization
 #elif defined(__SUNPRO_CC) && (__SUNPRO_CC < 0x5130)
-static const std::string DEFAULT_CHANNEL;
-static const std::string AAD_CHANNEL = "AAD";
 static const NameValuePairs& g_nullNameValuePairs = s_nullNameValuePairs;
 
 // We don't really want static here since it detracts from public symbol visibility, but the Windows
 // DLL fails to compile when the symbols are only const. Apparently Microsoft compilers don't treat
 // const the same as static in a translation unit for visibility under C++.
 #else
-static const std::string DEFAULT_CHANNEL;
-static const std::string AAD_CHANNEL("AAD");
 static const NameValuePairs& g_nullNameValuePairs(s_nullNameValuePairs);
 #endif
 
@@ -1434,7 +1449,7 @@ public:
 	///   the constraints of a particular generator.
 	/// \note A derived generator \a must override either GenerateBlock() or
 	///    GenerateIntoBufferedTransformation(). They can override both, or have one call the other.
-	virtual void GenerateIntoBufferedTransformation(BufferedTransformation &target, const std::string &channel, lword length);
+	virtual void GenerateIntoBufferedTransformation(BufferedTransformation &target, ChannelId channel, lword length);
 
 	/// \brief Generate and discard n bytes
 	/// \param n the number of bytes to generate and discard
@@ -1886,7 +1901,7 @@ public:
 		/// \return the number of bytes transferred during the call.
 		/// \details TransferTo removes bytes from this object and moves them to the destination.
 		/// \details The function always returns transferMax. If an accurate count is needed, then use TransferTo2().
-		lword TransferTo(BufferedTransformation &target, lword transferMax=LWORD_MAX, const std::string &channel=DEFAULT_CHANNEL)
+		lword TransferTo(BufferedTransformation &target, lword transferMax=LWORD_MAX, ChannelId channel=DEFAULT_CHANNEL)
 			{TransferTo2(target, transferMax, channel); return transferMax;}
 
 		/// \brief Discard skipMax bytes from the output buffer
@@ -1911,7 +1926,7 @@ public:
 		/// \return the number of bytes copied during the call.
 		/// \details CopyTo copies bytes from this object to the destination. The bytes are not removed from this object.
 		/// \details The function always returns copyMax. If an accurate count is needed, then use CopyRangeTo2().
-		lword CopyTo(BufferedTransformation &target, lword copyMax=LWORD_MAX, const std::string &channel=DEFAULT_CHANNEL) const
+		lword CopyTo(BufferedTransformation &target, lword copyMax=LWORD_MAX, ChannelId channel=DEFAULT_CHANNEL) const
 			{return CopyRangeTo(target, 0, copyMax, channel);}
 
 		/// \brief Copy bytes from this object using an index to another BufferedTransformation
@@ -1924,7 +1939,7 @@ public:
 		///   object. Copying begins at the index position in the current stream, and not from an absolute
 		///   position in the stream.
 		/// \details The function returns the new position in the stream after transferring the bytes starting at the index.
-		lword CopyRangeTo(BufferedTransformation &target, lword position, lword copyMax=LWORD_MAX, const std::string &channel=DEFAULT_CHANNEL) const
+		lword CopyRangeTo(BufferedTransformation &target, lword position, lword copyMax=LWORD_MAX, ChannelId channel=DEFAULT_CHANNEL) const
 			{lword i = position; CopyRangeTo2(target, i, i+copyMax, channel); return i-position;}
 	//@}
 
@@ -1968,7 +1983,7 @@ public:
 		///   If all bytes are not transferred for a message, then processing stops and the number of remaining
 		///   bytes is returned. TransferMessagesTo() does not proceed to the next message.
 		/// \details A return value of 0 indicates all messages were successfully transferred.
-		unsigned int TransferMessagesTo(BufferedTransformation &target, unsigned int count=UINT_MAX, const std::string &channel=DEFAULT_CHANNEL)
+		unsigned int TransferMessagesTo(BufferedTransformation &target, unsigned int count=UINT_MAX, ChannelId channel=DEFAULT_CHANNEL)
 			{TransferMessagesTo2(target, count, channel); return count;}
 
 		/// \brief Copy messages from this object to another BufferedTransformation
@@ -1980,7 +1995,7 @@ public:
 		///   If all bytes are not transferred for a message, then processing stops and the number of remaining
 		///   bytes is returned. CopyMessagesTo() does not proceed to the next message.
 		/// \details A return value of 0 indicates all messages were successfully copied.
-		unsigned int CopyMessagesTo(BufferedTransformation &target, unsigned int count=UINT_MAX, const std::string &channel=DEFAULT_CHANNEL) const;
+		unsigned int CopyMessagesTo(BufferedTransformation &target, unsigned int count=UINT_MAX, ChannelId channel=DEFAULT_CHANNEL) const;
 
 		/// \brief Skip all messages in the series
 		virtual void SkipAll();
@@ -1990,14 +2005,14 @@ public:
 		/// \param channel the channel on which the transfer should occur
 		/// \details TransferMessagesTo2() removes messages from this object and moves them to the destination.
 		///   Internally TransferAllTo() calls TransferAllTo2().
-		void TransferAllTo(BufferedTransformation &target, const std::string &channel=DEFAULT_CHANNEL)
+		void TransferAllTo(BufferedTransformation &target, ChannelId channel=DEFAULT_CHANNEL)
 			{TransferAllTo2(target, channel);}
 
 		/// \brief Copy messages from this object to another BufferedTransformation
 		/// \param target the destination BufferedTransformation
 		/// \param channel the channel on which the transfer should occur
 		/// \details CopyAllTo copies messages from this object and copies them to the destination.
-		void CopyAllTo(BufferedTransformation &target, const std::string &channel=DEFAULT_CHANNEL) const;
+		void CopyAllTo(BufferedTransformation &target, ChannelId channel=DEFAULT_CHANNEL) const;
 
 		/// \brief Retrieve the next message in a series
 		/// \return true if a message was retreved, false otherwise
@@ -2029,7 +2044,7 @@ public:
 		/// \details byteCount is an \a IN and \a OUT parameter. When the call is made,
 		///   byteCount is the requested size of the transfer. When the call returns, byteCount is
 		///   the number of bytes that were transferred.
-		virtual size_t TransferTo2(BufferedTransformation &target, lword &byteCount, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true) =0;
+		virtual size_t TransferTo2(BufferedTransformation &target, lword &byteCount, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true) =0;
 
 		// upon return, begin contains the start position of data yet to be finished copying,
 		// and returns the number of bytes left in the current transfer block
@@ -2048,7 +2063,7 @@ public:
 		///   starting position of the copy. When the call returns, begin is the position of the first
 		///   byte that was \a not copied (which may be different than end). begin can be used for
 		///   subsequent calls to CopyRangeTo2().
-		virtual size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true) const =0;
+		virtual size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true) const =0;
 
 		// upon return, messageCount contains number of messages that have finished being transferred,
 		// and returns the number of bytes left in the current transfer block
@@ -2063,7 +2078,7 @@ public:
 		/// \details messageCount is an \a IN and \a OUT parameter. When the call is made, messageCount is the
 		///   the number of messages requested to be transferred. When the call returns, messageCount is the
 		///   number of messages actually transferred.
-		size_t TransferMessagesTo2(BufferedTransformation &target, unsigned int &messageCount, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true);
+		size_t TransferMessagesTo2(BufferedTransformation &target, unsigned int &messageCount, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true);
 
 		// returns the number of bytes left in the current transfer block
 
@@ -2073,7 +2088,7 @@ public:
 		/// \param blocking specifies whether the object should block when processing input
 		/// \return the number of bytes that remain in the current transfer block (i.e., bytes not transferred)
 		/// \details TransferMessagesTo2() removes messages from this object and moves them to the destination.
-		size_t TransferAllTo2(BufferedTransformation &target, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true);
+		size_t TransferAllTo2(BufferedTransformation &target, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true);
 	//@}
 
 	///	\name CHANNELS
@@ -2083,7 +2098,7 @@ public:
 			{NoChannelSupport(const std::string &name) : NotImplemented(name + ": this object doesn't support multiple channels") {}};
 		/// \brief Exception thrown when a filter does not recognize a named channel
 		struct InvalidChannelName : public InvalidArgument
-			{InvalidChannelName(const std::string &name, const std::string &channel) : InvalidArgument(name + ": unexpected channel name \"" + channel + "\"") {}};
+			{InvalidChannelName(const std::string &name, ChannelId channel) : InvalidArgument(name + ": unexpected channel name \"" + ChannelToName(channel) + "\"") {}};
 
 		/// \brief Input a byte for processing on a channel
 		/// \param channel the channel to process the data.
@@ -2091,7 +2106,7 @@ public:
 		/// \param blocking specifies whether the object should block when processing input.
 		/// \return 0 indicates all bytes were processed during the call. Non-0 indicates the
 		///   number of bytes that were not processed.
-		size_t ChannelPut(const std::string &channel, byte inByte, bool blocking=true)
+		size_t ChannelPut(ChannelId channel, byte inByte, bool blocking=true)
 			{return ChannelPut(channel, &inByte, 1, blocking);}
 
 		/// \brief Input a byte buffer for processing on a channel
@@ -2101,7 +2116,7 @@ public:
 		/// \param blocking specifies whether the object should block when processing input
 		/// \return 0 indicates all bytes were processed during the call. Non-0 indicates the
 		///   number of bytes that were not processed.
-		size_t ChannelPut(const std::string &channel, const byte *inString, size_t length, bool blocking=true)
+		size_t ChannelPut(ChannelId channel, const byte *inString, size_t length, bool blocking=true)
 			{return ChannelPut2(channel, inString, length, 0, blocking);}
 
 		/// \brief Input multiple bytes that may be modified by callee on a channel
@@ -2111,7 +2126,7 @@ public:
 		/// \param blocking specifies whether the object should block when processing input
 		/// \return 0 indicates all bytes were processed during the call. Non-0 indicates the
 		///   number of bytes that were not processed.
-		size_t ChannelPutModifiable(const std::string &channel, byte *inString, size_t length, bool blocking=true)
+		size_t ChannelPutModifiable(ChannelId channel, byte *inString, size_t length, bool blocking=true)
 			{return ChannelPutModifiable2(channel, inString, length, 0, blocking);}
 
 		/// \brief Input a 16-bit word for processing on a channel.
@@ -2121,7 +2136,7 @@ public:
 		/// \param blocking specifies whether the object should block when processing input.
 		/// \return 0 indicates all bytes were processed during the call. Non-0 indicates the
 		///   number of bytes that were not processed.
-		size_t ChannelPutWord16(const std::string &channel, word16 value, ByteOrder order=BIG_ENDIAN_ORDER, bool blocking=true);
+		size_t ChannelPutWord16(ChannelId channel, word16 value, ByteOrder order=BIG_ENDIAN_ORDER, bool blocking=true);
 
 		/// \brief Input a 32-bit word for processing on a channel.
 		/// \param channel the channel to process the data.
@@ -2130,7 +2145,7 @@ public:
 		/// \param blocking specifies whether the object should block when processing input.
 		/// \return 0 indicates all bytes were processed during the call. Non-0 indicates the
 		///   number of bytes that were not processed.
-		size_t ChannelPutWord32(const std::string &channel, word32 value, ByteOrder order=BIG_ENDIAN_ORDER, bool blocking=true);
+		size_t ChannelPutWord32(ChannelId channel, word32 value, ByteOrder order=BIG_ENDIAN_ORDER, bool blocking=true);
 
 		/// \brief Signal the end of a message
 		/// \param channel the channel to process the data.
@@ -2140,7 +2155,7 @@ public:
 		///   number of bytes that were not processed.
 		/// \details propagation count includes this object. Setting propagation to <tt>1</tt> means this
 		///   object only. Setting propagation to <tt>-1</tt> means unlimited propagation.
-		bool ChannelMessageEnd(const std::string &channel, int propagation=-1, bool blocking=true)
+		bool ChannelMessageEnd(ChannelId channel, int propagation=-1, bool blocking=true)
 			{return !!ChannelPut2(channel, NULLPTR, 0, propagation < 0 ? -1 : propagation+1, blocking);}
 
 		/// \brief Input multiple bytes for processing and signal the end of a message
@@ -2152,7 +2167,7 @@ public:
 		/// \return the number of bytes that remain in the block (i.e., bytes not processed)
 		/// \details propagation count includes this object. Setting propagation to <tt>1</tt> means this
 		///   object only. Setting propagation to <tt>-1</tt> means unlimited propagation.
-		size_t ChannelPutMessageEnd(const std::string &channel, const byte *inString, size_t length, int propagation=-1, bool blocking=true)
+		size_t ChannelPutMessageEnd(ChannelId channel, const byte *inString, size_t length, int propagation=-1, bool blocking=true)
 			{return ChannelPut2(channel, inString, length, propagation < 0 ? -1 : propagation+1, blocking);}
 
 		/// \brief Request space which can be written into by the caller
@@ -2166,7 +2181,7 @@ public:
 		/// \details The base class implementation sets size to 0 and returns NULL.
 		/// \note Some objects, like ArraySink(), cannot create a space because its fixed. In the case of
 		/// an ArraySink(), the pointer to the array is returned and the size is remaining size.
-		virtual byte * ChannelCreatePutSpace(const std::string &channel, size_t &size);
+		virtual byte * ChannelCreatePutSpace(ChannelId channel, size_t &size);
 
 		/// \brief Input multiple bytes for processing on a channel.
 		/// \param channel the channel to process the data.
@@ -2175,7 +2190,7 @@ public:
 		/// \param messageEnd means how many filters to signal MessageEnd() to, including this one.
 		/// \param blocking specifies whether the object should block when processing input.
 		/// \return the number of bytes that remain in the block (i.e., bytes not processed)
-		virtual size_t ChannelPut2(const std::string &channel, const byte *inString, size_t length, int messageEnd, bool blocking);
+		virtual size_t ChannelPut2(ChannelId channel, const byte *inString, size_t length, int messageEnd, bool blocking);
 
 		/// \brief Input multiple bytes that may be modified by callee on a channel
 		/// \param channel the channel to process the data
@@ -2184,7 +2199,7 @@ public:
 		/// \param messageEnd means how many filters to signal MessageEnd() to, including this one
 		/// \param blocking specifies whether the object should block when processing input
 		/// \return the number of bytes that remain in the block (i.e., bytes not processed)
-		virtual size_t ChannelPutModifiable2(const std::string &channel, byte *inString, size_t length, int messageEnd, bool blocking);
+		virtual size_t ChannelPutModifiable2(ChannelId channel, byte *inString, size_t length, int messageEnd, bool blocking);
 
 		/// \brief Flush buffered input and/or output on a channel
 		/// \param channel the channel to flush the data
@@ -2194,7 +2209,7 @@ public:
 		/// \return true of the Flush was successful
 		/// \details propagation count includes this object. Setting propagation to <tt>1</tt> means this
 		///   object only. Setting propagation to <tt>-1</tt> means unlimited propagation.
-		virtual bool ChannelFlush(const std::string &channel, bool hardFlush, int propagation=-1, bool blocking=true);
+		virtual bool ChannelFlush(ChannelId channel, bool hardFlush, int propagation=-1, bool blocking=true);
 
 		/// \brief Marks the end of a series of messages on a channel
 		/// \param channel the channel to signal the end of a series of messages
@@ -2205,12 +2220,12 @@ public:
 		/// \details propagation count includes this object. Setting propagation to <tt>1</tt> means this
 		///   object only. Setting propagation to <tt>-1</tt> means unlimited propagation.
 		/// \note There should be a MessageEnd() immediately before MessageSeriesEnd().
-		virtual bool ChannelMessageSeriesEnd(const std::string &channel, int propagation=-1, bool blocking=true);
+		virtual bool ChannelMessageSeriesEnd(ChannelId channel, int propagation=-1, bool blocking=true);
 
 		/// \brief Sets the default retrieval channel
 		/// \param channel the channel to signal the end of a series of messages
 		/// \note this function may not be implemented in all objects that should support it.
-		virtual void SetRetrievalChannel(const std::string &channel);
+		virtual void SetRetrievalChannel(ChannelId channel);
 	//@}
 
 	///	\name ATTACHMENT

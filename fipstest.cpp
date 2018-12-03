@@ -82,11 +82,11 @@ void KnownAnswerTest(RandomNumberGenerator &rng, const char *output)
 {
 	EqualityComparisonFilter comparison;
 
-	RandomNumberStore(rng, strlen(output)/2).TransferAllTo(comparison, "0");
-	StringSource(output, true, new HexDecoder(new ChannelSwitch(comparison, "1")));
+	RandomNumberStore(rng, strlen(output)/2).TransferAllTo(comparison, CHANNEL0);
+	StringSource(output, true, new HexDecoder(new ChannelSwitch(comparison, CHANNEL1)));
 
-	comparison.ChannelMessageSeriesEnd("0");
-	comparison.ChannelMessageSeriesEnd("1");
+	comparison.ChannelMessageSeriesEnd(CHANNEL0);
+	comparison.ChannelMessageSeriesEnd(CHANNEL1);
 }
 
 template <class CIPHER>
@@ -114,14 +114,14 @@ void KnownAnswerTest(StreamTransformation &encryption, StreamTransformation &dec
 {
 	EqualityComparisonFilter comparison;
 
-	StringSource(plaintext, true, new HexDecoder(new StreamTransformationFilter(encryption, new ChannelSwitch(comparison, "0"), StreamTransformationFilter::NO_PADDING)));
-	StringSource(ciphertext, true, new HexDecoder(new ChannelSwitch(comparison, "1")));
+	StringSource(plaintext, true, new HexDecoder(new StreamTransformationFilter(encryption, new ChannelSwitch(comparison, CHANNEL0), StreamTransformationFilter::NO_PADDING)));
+	StringSource(ciphertext, true, new HexDecoder(new ChannelSwitch(comparison, CHANNEL1)));
 
-	StringSource(ciphertext, true, new HexDecoder(new StreamTransformationFilter(decryption, new ChannelSwitch(comparison, "0"), StreamTransformationFilter::NO_PADDING)));
-	StringSource(plaintext, true, new HexDecoder(new ChannelSwitch(comparison, "1")));
+	StringSource(ciphertext, true, new HexDecoder(new StreamTransformationFilter(decryption, new ChannelSwitch(comparison, CHANNEL0), StreamTransformationFilter::NO_PADDING)));
+	StringSource(plaintext, true, new HexDecoder(new ChannelSwitch(comparison, CHANNEL1)));
 
-	comparison.ChannelMessageSeriesEnd("0");
-	comparison.ChannelMessageSeriesEnd("1");
+	comparison.ChannelMessageSeriesEnd(CHANNEL0);
+	comparison.ChannelMessageSeriesEnd(CHANNEL1);
 }
 
 template <class CIPHER>
@@ -159,11 +159,11 @@ void SymmetricEncryptionKnownAnswerTest(
 void KnownAnswerTest(HashTransformation &hash, const char *message, const char *digest)
 {
 	EqualityComparisonFilter comparison;
-	StringSource(digest, true, new HexDecoder(new ChannelSwitch(comparison, "1")));
-	StringSource(message, true, new HashFilter(hash, new ChannelSwitch(comparison, "0")));
+	StringSource(digest, true, new HexDecoder(new ChannelSwitch(comparison, CHANNEL1)));
+	StringSource(message, true, new HashFilter(hash, new ChannelSwitch(comparison, CHANNEL0)));
 
-	comparison.ChannelMessageSeriesEnd("0");
-	comparison.ChannelMessageSeriesEnd("1");
+	comparison.ChannelMessageSeriesEnd(CHANNEL0);
+	comparison.ChannelMessageSeriesEnd(CHANNEL1);
 }
 
 template <class HASH>
@@ -192,11 +192,11 @@ void SignatureKnownAnswerTest(const char *key, const char *message, const char *
 	RandomPool rng;
 	EqualityComparisonFilter comparison;
 
-	StringSource(message, true, new SignerFilter(rng, signer, new ChannelSwitch(comparison, "0")));
-	StringSource(signature, true, new HexDecoder(new ChannelSwitch(comparison, "1")));
+	StringSource(message, true, new SignerFilter(rng, signer, new ChannelSwitch(comparison, CHANNEL0)));
+	StringSource(signature, true, new HexDecoder(new ChannelSwitch(comparison, CHANNEL1)));
 
-	comparison.ChannelMessageSeriesEnd("0");
-	comparison.ChannelMessageSeriesEnd("1");
+	comparison.ChannelMessageSeriesEnd(CHANNEL0);
+	comparison.ChannelMessageSeriesEnd(CHANNEL1);
 
 	SignatureVerificationFilter verifierFilter(verifier, NULLPTR, SignatureVerificationFilter::SIGNATURE_AT_BEGIN | SignatureVerificationFilter::THROW_EXCEPTION);
 	StringSource(signature, true, new HexDecoder(new Redirector(verifierFilter, Redirector::DATA_ONLY)));
@@ -271,7 +271,10 @@ void SignaturePairwiseConsistencyTest(const char *key)
 
 MessageAuthenticationCode * NewIntegrityCheckingMAC()
 {
-	byte key[] = {0x47, 0x1E, 0x33, 0x96, 0x65, 0xB1, 0x6A, 0xED, 0x0B, 0xF8, 0x6B, 0xFD, 0x01, 0x65, 0x05, 0xCC};
+	const byte key[] = {
+		0x47, 0x1E, 0x33, 0x96, 0x65, 0xB1, 0x6A, 0xED,
+		0x0B, 0xF8, 0x6B, 0xFD, 0x01, 0x65, 0x05, 0xCC
+	};
 	return new HMAC<SHA1>(key, sizeof(key));
 }
 
@@ -626,7 +629,7 @@ void DoDllPowerUpSelfTest()
 	throw NotImplemented("DoDllPowerUpSelfTest() only available on Windows");
 }
 
-#endif	// #ifdef CRYPTOPP_WIN32_AVAILABLE
+#endif	// CRYPTOPP_WIN32_AVAILABLE
 
 NAMESPACE_END
 
@@ -645,6 +648,6 @@ BOOL APIENTRY DllMain(HANDLE hModule,
     return TRUE;
 }
 
-#endif	// #ifdef CRYPTOPP_WIN32_AVAILABLE
+#endif	// CRYPTOPP_WIN32_AVAILABLE
 
-#endif	// #ifndef CRYPTOPP_IMPORTS
+#endif	// CRYPTOPP_IMPORTS

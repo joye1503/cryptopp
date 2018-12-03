@@ -474,7 +474,7 @@ void BERGeneralDecoder::MessageEnd()
 	}
 }
 
-size_t BERGeneralDecoder::TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel, bool blocking)
+size_t BERGeneralDecoder::TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel, bool blocking)
 {
 	if (m_definiteLength && transferBytes > m_length)
 		transferBytes = m_length;
@@ -483,7 +483,7 @@ size_t BERGeneralDecoder::TransferTo2(BufferedTransformation &target, lword &tra
 	return blockedBytes;
 }
 
-size_t BERGeneralDecoder::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, const std::string &channel, bool blocking) const
+size_t BERGeneralDecoder::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, ChannelId channel, bool blocking) const
 {
 	if (m_definiteLength)
 		end = STDMIN(m_length, end);

@@ -65,7 +65,7 @@ public:
 	/// \sa AutoSeededX917RNG
 	X917RNG(BlockTransformation *cipher, const byte *seed, const byte *deterministicTimeVector = NULLPTR);
 
-	void GenerateIntoBufferedTransformation(BufferedTransformation &target, const std::string &channel, lword size);
+	void GenerateIntoBufferedTransformation(BufferedTransformation &target, ChannelId channel, lword size);
 
 private:
 	member_ptr<BlockTransformation> m_cipher;

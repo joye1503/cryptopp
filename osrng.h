@@ -218,7 +218,7 @@ public:
 
 	bool CanIncorporateEntropy() const {return true;}
 	void IncorporateEntropy(const byte *input, size_t length) {Reseed(false, input, length);}
-	void GenerateIntoBufferedTransformation(BufferedTransformation &target, const std::string &channel, lword length)
+	void GenerateIntoBufferedTransformation(BufferedTransformation &target, ChannelId channel, lword length)
 		{m_rng->GenerateIntoBufferedTransformation(target, channel, length);}
 
 	std::string AlgorithmProvider() const;

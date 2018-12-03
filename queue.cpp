@@ -67,14 +67,14 @@ public:
 		return len;
 	}
 
-	inline size_t CopyTo(BufferedTransformation &target, const std::string &channel=DEFAULT_CHANNEL) const
+	inline size_t CopyTo(BufferedTransformation &target, ChannelId channel=DEFAULT_CHANNEL) const
 	{
 		size_t len = m_tail-m_head;
 		target.ChannelPut(channel, m_buf+m_head, len);
 		return len;
 	}
 
-	inline size_t CopyTo(BufferedTransformation &target, size_t copyMax, const std::string &channel=DEFAULT_CHANNEL) const
+	inline size_t CopyTo(BufferedTransformation &target, size_t copyMax, ChannelId channel=DEFAULT_CHANNEL) const
 	{
 		size_t len = STDMIN(copyMax, m_tail-m_head);
 		target.ChannelPut(channel, m_buf+m_head, len);
@@ -95,7 +95,7 @@ public:
 		return len;
 	}
 
-	inline size_t TransferTo(BufferedTransformation &target, const std::string &channel=DEFAULT_CHANNEL)
+	inline size_t TransferTo(BufferedTransformation &target, ChannelId channel=DEFAULT_CHANNEL)
 	{
 		size_t len = m_tail-m_head;
 		target.ChannelPutModifiable(channel, m_buf+m_head, len);
@@ -103,7 +103,7 @@ public:
 		return len;
 	}
 
-	inline size_t TransferTo(BufferedTransformation &target, lword transferMax, const std::string &channel=DEFAULT_CHANNEL)
+	inline size_t TransferTo(BufferedTransformation &target, lword transferMax, ChannelId channel=DEFAULT_CHANNEL)
 	{
 		size_t len = UnsignedMin(m_tail-m_head, transferMax);
 		target.ChannelPutModifiable(channel, m_buf+m_head, len);
@@ -341,7 +341,7 @@ size_t ByteQueue::Peek(byte *outString, size_t peekMax) const
 	return (size_t)CopyTo(sink, peekMax);
 }
 
-size_t ByteQueue::TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel, bool blocking)
+size_t ByteQueue::TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel, bool blocking)
 {
 	if (blocking)
 	{
@@ -373,7 +373,7 @@ size_t ByteQueue::TransferTo2(BufferedTransformation &target, lword &transferByt
 	}
 }
 
-size_t ByteQueue::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, const std::string &channel, bool blocking) const
+size_t ByteQueue::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, ChannelId channel, bool blocking) const
 {
 	Walker walker(*this);
 	walker.Skip(begin);
@@ -517,7 +517,7 @@ size_t ByteQueue::Walker::Peek(byte *outString, size_t peekMax) const
 	return (size_t)CopyTo(sink, peekMax);
 }
 
-size_t ByteQueue::Walker::TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel, bool blocking)
+size_t ByteQueue::Walker::TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel, bool blocking)
 {
 	lword bytesLeft = transferBytes;
 	size_t blockedBytes = 0;
@@ -560,7 +560,7 @@ done:
 	return blockedBytes;
 }
 
-size_t ByteQueue::Walker::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, const std::string &channel, bool blocking) const
+size_t ByteQueue::Walker::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, ChannelId channel, bool blocking) const
 {
 	Walker walker(*this);
 	walker.Skip(begin);

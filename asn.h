@@ -265,8 +265,8 @@ public:
 	byte PeekByte() const;
 	void CheckByte(byte b);
 
-	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true);
-	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true) const;
+	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true);
+	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true) const;
 
 	// call this to denote end of sequence
 	void MessageEnd();

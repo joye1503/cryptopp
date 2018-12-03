@@ -127,7 +127,7 @@ const std::string & GetRequiredDatum(const TestData &data, const char *name)
 	return i->second;
 }
 
-void RandomizedTransfer(BufferedTransformation &source, BufferedTransformation &target, bool finish, const std::string &channel=DEFAULT_CHANNEL)
+void RandomizedTransfer(BufferedTransformation &source, BufferedTransformation &target, bool finish, ChannelId channel=DEFAULT_CHANNEL)
 {
 	while (source.MaxRetrievable() > (finish ? 0 : 4096))
 	{

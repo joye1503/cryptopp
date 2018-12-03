@@ -45,10 +45,10 @@ bool TestPolynomialMod2()
 
     std::cout << "\nTesting PolynomialMod2 bit operations...\n\n";
 
-    static const unsigned int start = 0;
-    static const unsigned int stop = 4 * WORD_BITS + 1;
+    const unsigned int start = 0;
+    const unsigned int stop = 4 * WORD_BITS + 1;
 
-    for (unsigned int i = start; i < stop; i++)
+    for (unsigned int i = start; i < stop; ++i)
     {
         PolynomialMod2 p(1);
         p <<= i;
@@ -74,7 +74,7 @@ bool TestPolynomialMod2()
         pass1 &= (str1 == str2);
     }
 
-    for (unsigned int i = start; i < stop; i++)
+    for (unsigned int i = start; i < stop; ++i)
     {
         const word w((word)SIZE_MAX);
 
@@ -103,7 +103,7 @@ bool TestPolynomialMod2()
     }
 
     RandomNumberGenerator& prng = GlobalRNG();
-    for (unsigned int i = start; i < stop; i++)
+    for (unsigned int i = start; i < stop; ++i)
     {
         word w;     // Cast to lword due to Visual Studio
         prng.GenerateBlock((byte*)&w, sizeof(w));
@@ -227,7 +227,7 @@ bool TestCompressors()
     }
 
     // Unzip random data. See if we can induce a crash
-    for (unsigned int i = 0; i<COMP_COUNT; i++)
+    for (unsigned int i = 0; i<COMP_COUNT; ++i)
     {
         SecByteBlock src;
         unsigned int len = GlobalRNG().GenerateWord32(4, 0xfff);
@@ -240,7 +240,7 @@ bool TestCompressors()
     }
 
     // Unzip random data. See if we can induce a crash
-    for (unsigned int i = 0; i<COMP_COUNT; i++)
+    for (unsigned int i = 0; i<COMP_COUNT; ++i)
     {
         SecByteBlock src;
         unsigned int len = GlobalRNG().GenerateWord32(4, 0xfff);
@@ -311,7 +311,7 @@ bool TestCompressors()
     // **************************************************************
 
     // Inflate random data. See if we can induce a crash
-    for (unsigned int i = 0; i<COMP_COUNT; i++)
+    for (unsigned int i = 0; i<COMP_COUNT; ++i)
     {
         SecByteBlock src;
         unsigned int len = GlobalRNG().GenerateWord32(4, 0xfff);
@@ -338,7 +338,7 @@ bool TestCompressors()
     }
 
     // Inflate random data. See if we can induce a crash
-    for (unsigned int i = 0; i<COMP_COUNT; i++)
+    for (unsigned int i = 0; i<COMP_COUNT; ++i)
     {
         SecByteBlock src;
         unsigned int len = GlobalRNG().GenerateWord32(4, 0xfff);
@@ -390,7 +390,7 @@ bool TestCompressors()
     // **************************************************************
 
     // Decompress random data. See if we can induce a crash
-    for (unsigned int i = 0; i<COMP_COUNT; i++)
+    for (unsigned int i = 0; i<COMP_COUNT; ++i)
     {
         SecByteBlock src;
         unsigned int len = GlobalRNG().GenerateWord32(4, 0xfff);
@@ -427,7 +427,7 @@ bool TestCompressors()
 bool TestEncryptors()
 {
     std::cout << "\nTesting Default Encryptors and Decryptors...\n\n";
-    static const unsigned int ENCRYPT_COUNT = 64, ENCRYPT_MAC_COUNT = 64;
+    const unsigned int ENCRYPT_COUNT = 64, ENCRYPT_MAC_COUNT = 64;
     bool fail0 = false, fail1 = false, fail2 = false, fail3 = false, fail4 = false;
 
     // **************************************************************
@@ -658,9 +658,9 @@ bool TestEncryptors()
 bool TestSharing()
 {
     std::cout << "\nInformation Dispersal and Secret Sharing...\n\n";
-    static const unsigned int INFORMATION_SHARES = 64;
-    static const unsigned int SECRET_SHARES = 64;
-    static const unsigned int CHID_LENGTH = 4;
+    const unsigned int INFORMATION_SHARES = 64;
+    const unsigned int SECRET_SHARES = 64;
+    const unsigned int CHID_LENGTH = 4;
     bool pass=true, fail=false;
 
     // ********** Infrmation Dispersal **********//
@@ -681,12 +681,12 @@ bool TestSharing()
         std::string channel;
 
         // ********** Create Shares
-        for (unsigned int i=0; i<shares; i++)
+        for (unsigned int i=0; i<shares; ++i)
         {
             strSinks[i].reset(new StringSink(strShares[i]));
             channel = WordToString<word32>(i);
             strSinks[i]->Put((const byte *)channel.data(), CHID_LENGTH);
-            channelSwitch->AddRoute(channel, *strSinks[i], DEFAULT_CHANNEL);
+            channelSwitch->AddRoute(static_cast<ChannelId>(i), *strSinks[i], DEFAULT_CHANNEL);
         }
         source.PumpAll();
 
@@ -703,21 +703,23 @@ bool TestSharing()
             vector_member_ptrs<StringSource> strSources(threshold);
             channel.resize(CHID_LENGTH);
 
-            for (unsigned int i=0; i<threshold; i++)
+            for (unsigned int i=0; i<threshold; ++i)
             {
                 strSources[i].reset(new StringSource(strShares[i], false));
                 strSources[i]->Pump(CHID_LENGTH);
                 strSources[i]->Get((byte*)&channel[0], CHID_LENGTH);
-                strSources[i]->Attach(new ChannelSwitch(recovery, channel));
+
+				ChannelId ch = (ChannelId)StringToWord<word32>(channel);
+                strSources[i]->Attach(new ChannelSwitch(recovery, ch));
             }
 
             while (strSources[0]->Pump(256))
             {
-                for (unsigned int i=1; i<threshold; i++)
+                for (unsigned int i=1; i<threshold; ++i)
                     strSources[i]->Pump(256);
             }
 
-            for (unsigned int i=0; i<threshold; i++)
+            for (unsigned int i=0; i<threshold; ++i)
                 strSources[i]->PumpAll();
 
             fail = (message != recovered);
@@ -751,12 +753,12 @@ bool TestSharing()
         std::string channel;
 
         // ********** Create Shares
-        for (unsigned int i=0; i<shares; i++)
+        for (unsigned int i=0; i<shares; ++i)
         {
+			channel = WordToString<word32>(i);
             strSinks[i].reset(new StringSink(strShares[i]));
-            channel = WordToString<word32>(i);
             strSinks[i]->Put((const byte *)channel.data(), CHID_LENGTH);
-            channelSwitch->AddRoute(channel, *strSinks[i], DEFAULT_CHANNEL);
+            channelSwitch->AddRoute(static_cast<ChannelId>(i), *strSinks[i], DEFAULT_CHANNEL);
         }
         source.PumpAll();
 
@@ -772,21 +774,23 @@ bool TestSharing()
 
             vector_member_ptrs<StringSource> strSources(threshold);
             channel.resize(CHID_LENGTH);
-            for (unsigned int i=0; i<threshold; i++)
+            for (unsigned int i=0; i<threshold; ++i)
             {
                 strSources[i].reset(new StringSource(strShares[i], false));
                 strSources[i]->Pump(CHID_LENGTH);
                 strSources[i]->Get((byte*)&channel[0], CHID_LENGTH);
-                strSources[i]->Attach(new ChannelSwitch(recovery, channel));
+
+				ChannelId ch = (ChannelId)StringToWord<word32>(channel);
+                strSources[i]->Attach(new ChannelSwitch(recovery, ch));
             }
 
             while (strSources[0]->Pump(256))
             {
-                for (unsigned int i=1; i<threshold; i++)
+                for (unsigned int i=1; i<threshold; ++i)
                     strSources[i]->Pump(256);
             }
 
-            for (unsigned int i=0; i<threshold; i++)
+            for (unsigned int i=0; i<threshold; ++i)
                 strSources[i]->PumpAll();
 
             fail = (message != recovered);
@@ -1266,7 +1270,7 @@ bool RunASN1TestSet(const ASN1_TestTuple asnTuples[], size_t count)
     // Disposition
     enum {REJECT=3, ACCEPT=4};
 
-    for(size_t i=0; i<count; i++)
+    for(size_t i=0; i<count; ++i)
     {
         const ASN1_TestTuple & thisTest = asnTuples[i];
         ArraySource as1((const byte*)thisTest.data, thisTest.len, true);
@@ -1337,7 +1341,7 @@ bool TestASN1Parse()
 
     // All the types Crypto++ recognizes.
     //   "C" is one content octet with value 0x43.
-    static const ASN1_TestTuple bitStrings[] =
+    const ASN1_TestTuple bitStrings[] =
     {
         // The first "\x00" content octet is the "initial octet" representing unused bits. In the
         //   primitive encoding form, there may be zero, one or more contents after the initial octet.
@@ -1364,7 +1368,7 @@ bool TestASN1Parse()
 
     pass = RunASN1TestSet(bitStrings, COUNTOF(bitStrings)) && pass;
 
-    static const ASN1_TestTuple octetStrings[] =
+    const ASN1_TestTuple octetStrings[] =
     {
         // In the primitive encoding form, there may be zero, one or more contents.
         {ACCEPT, OCTET_STRING, "OCTET_STRING", "\x04\x00", 2},  // definite length, short form, zero content octets
@@ -1391,7 +1395,7 @@ bool TestASN1Parse()
 
     pass = RunASN1TestSet(octetStrings, COUNTOF(octetStrings)) && pass;
 
-    static const ASN1_TestTuple utf8Strings[] =
+    const ASN1_TestTuple utf8Strings[] =
     {
         {ACCEPT, UTF8_STRING, "UTF8_STRING", "\x0c\x00", 2},  // definite length, short form, zero content octets
         {ACCEPT, UTF8_STRING, "UTF8_STRING", "\x0c\x01" "C", 3},  // definite length, short form, expected content octets
@@ -1417,7 +1421,7 @@ bool TestASN1Parse()
 
     pass = RunASN1TestSet(utf8Strings, COUNTOF(utf8Strings)) && pass;
 
-    static const ASN1_TestTuple printableStrings[] =
+    const ASN1_TestTuple printableStrings[] =
     {
         {ACCEPT, PRINTABLE_STRING, "PRINTABLE_STRING", "\x13\x00", 2},  // definite length, short form, zero content octets
         {ACCEPT, PRINTABLE_STRING, "PRINTABLE_STRING", "\x13\x01" "C", 3},  // definite length, short form, expected content octets
@@ -1443,7 +1447,7 @@ bool TestASN1Parse()
 
     pass = RunASN1TestSet(printableStrings, COUNTOF(printableStrings)) && pass;
 
-    static const ASN1_TestTuple ia5Strings[] =
+    const ASN1_TestTuple ia5Strings[] =
     {
         {ACCEPT, IA5_STRING, "IA5_STRING", "\x16\x00", 2},  // definite length, short form, zero content octets
         {ACCEPT, IA5_STRING, "IA5_STRING", "\x16\x01" "C", 3},  // definite length, short form, expected content octets
@@ -1469,7 +1473,7 @@ bool TestASN1Parse()
 
     pass = RunASN1TestSet(ia5Strings, COUNTOF(ia5Strings)) && pass;
 
-    static const ASN1_TestTuple integerValues[] =
+    const ASN1_TestTuple integerValues[] =
     {
         // 8.3.1 The encoding of an integer value shall be primitive. The contents octets shall consist of one or more octets.
         {REJECT, INTEGER, "INTEGER", "\x02\x00", 2},  // definite length, short form, zero content octets

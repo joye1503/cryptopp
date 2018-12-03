@@ -40,8 +40,8 @@ public:
 	bool AnyRetrievable() const
 		{return m_lengths.front() > 0;}
 
-	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true);
-	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true) const;
+	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true);
+	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true) const;
 
 	lword TotalBytesRetrievable() const
 		{return m_queue.MaxRetrievable();}
@@ -54,7 +54,7 @@ public:
 	unsigned int NumberOfMessageSeries() const
 		{return (unsigned int)m_messageCounts.size()-1;}
 
-	unsigned int CopyMessagesTo(BufferedTransformation &target, unsigned int count=UINT_MAX, const std::string &channel=DEFAULT_CHANNEL) const;
+	unsigned int CopyMessagesTo(BufferedTransformation &target, unsigned int count=UINT_MAX, ChannelId channel=DEFAULT_CHANNEL) const;
 
 	const byte * Spy(size_t &contiguousSize) const;
 
@@ -73,21 +73,22 @@ class CRYPTOPP_DLL EqualityComparisonFilter : public Unflushable<Multichannel<Fi
 public:
 	struct MismatchDetected : public Exception {MismatchDetected() : Exception(DATA_INTEGRITY_CHECK_FAILED, "EqualityComparisonFilter: did not receive the same data on two channels") {}};
 
-	/*! if throwIfNotEqual is false, this filter will output a '\\0' byte when it detects a mismatch, '\\1' otherwise */
-	EqualityComparisonFilter(BufferedTransformation *attachment=NULLPTR, bool throwIfNotEqual=true, const std::string &firstChannel="0", const std::string &secondChannel="1")
+	/// \details if throwIfNotEqual is false, this filter will output a '\\0' byte when
+	///   it detects a mismatch, '\\1' otherwise
+	EqualityComparisonFilter(BufferedTransformation *attachment=NULLPTR, bool throwIfNotEqual=true, ChannelId firstChannel=CHANNEL0, ChannelId secondChannel=CHANNEL1)
 		: m_throwIfNotEqual(throwIfNotEqual), m_mismatchDetected(false)
 		, m_firstChannel(firstChannel), m_secondChannel(secondChannel)
 		{Detach(attachment);}
 
-	size_t ChannelPut2(const std::string &channel, const byte *begin, size_t length, int messageEnd, bool blocking);
-	bool ChannelMessageSeriesEnd(const std::string &channel, int propagation=-1, bool blocking=true);
+	size_t ChannelPut2(ChannelId channel, const byte *begin, size_t length, int messageEnd, bool blocking);
+	bool ChannelMessageSeriesEnd(ChannelId channel, int propagation=-1, bool blocking=true);
 
 private:
-	unsigned int MapChannel(const std::string &channel) const;
+	unsigned int MapChannel(ChannelId channel) const;
 	bool HandleMismatchDetected(bool blocking);
 
 	bool m_throwIfNotEqual, m_mismatchDetected;
-	std::string m_firstChannel, m_secondChannel;
+	ChannelId m_firstChannel, m_secondChannel;
 	MessageQueue m_q[2];
 };
 

@@ -641,7 +641,7 @@ void SecretShareFile(int threshold, int nShares, const char *filename, const cha
 
 		channel = WordToString<word32>(i);
 		fileSinks[i]->Put((const byte *)channel.data(), 4);
-		channelSwitch->AddRoute(channel, *fileSinks[i], DEFAULT_CHANNEL);
+		channelSwitch->AddRoute(static_cast<ChannelId>(i), *fileSinks[i], DEFAULT_CHANNEL);
 	}
 
 	source.PumpAll();
@@ -657,20 +657,21 @@ void SecretRecoverFile(int threshold, const char *outFilename, char *const *inFi
 
 	vector_member_ptrs<FileSource> fileSources(threshold);
 	SecByteBlock channel(4);
-	int i;
-	for (i=0; i<threshold; i++)
+	for (int i=0; i<threshold; i++)
 	{
 		fileSources[i].reset(new FileSource(inFilenames[i], false));
 		fileSources[i]->Pump(4);
 		fileSources[i]->Get(channel, 4);
-		fileSources[i]->Attach(new ChannelSwitch(recovery, std::string((char *)channel.begin(), 4)));
+
+		word32 ch = StringToWord<word32>(std::string((char *)channel.begin(), 4));
+		fileSources[i]->Attach(new ChannelSwitch(recovery, static_cast<ChannelId>(ch)));
 	}
 
 	while (fileSources[0]->Pump(256))
-		for (i=1; i<threshold; i++)
+		for (int i=1; i<threshold; i++)
 			fileSources[i]->Pump(256);
 
-	for (i=0; i<threshold; i++)
+	for (int i=0; i<threshold; i++)
 		fileSources[i]->PumpAll();
 }
 
@@ -697,7 +698,7 @@ void InformationDisperseFile(int threshold, int nShares, const char *filename)
 
 		channel = WordToString<word32>(i);
 		fileSinks[i]->Put((const byte *)channel.data(), 4);
-		channelSwitch->AddRoute(channel, *fileSinks[i], DEFAULT_CHANNEL);
+		channelSwitch->AddRoute(static_cast<ChannelId>(i), *fileSinks[i], DEFAULT_CHANNEL);
 	}
 
 	source.PumpAll();
@@ -719,7 +720,9 @@ void InformationRecoverFile(int threshold, const char *outFilename, char *const 
 		fileSources[i].reset(new FileSource(inFilenames[i], false));
 		fileSources[i]->Pump(4);
 		fileSources[i]->Get(channel, 4);
-		fileSources[i]->Attach(new ChannelSwitch(recovery, std::string((char *)channel.begin(), 4)));
+
+		word32 ch = StringToWord<word32>(std::string((char *)channel.begin(), 4));
+		fileSources[i]->Attach(new ChannelSwitch(recovery, static_cast<ChannelId>(ch)));
 	}
 
 	while (fileSources[0]->Pump(256))
@@ -744,22 +747,20 @@ void GzipFile(const char *in, const char *out, int deflate_level)
 	//		      > ComparisonFilter
 
 	EqualityComparisonFilter comparison;
-
-	Gunzip gunzip(new ChannelSwitch(comparison, "0"));
+	Gunzip gunzip(new ChannelSwitch(comparison, CHANNEL0));
 	gunzip.SetAutoSignalPropagation(0);
 
 	FileSink sink(out);
-
 	ChannelSwitch *cs;
 	Gzip gzip(cs = new ChannelSwitch(sink), deflate_level);
 	cs->AddDefaultRoute(gunzip);
 
 	cs = new ChannelSwitch(gzip);
-	cs->AddDefaultRoute(comparison, "1");
+	cs->AddDefaultRoute(comparison, CHANNEL1);
 	FileSource source(in, true, cs);
 
-	comparison.ChannelMessageSeriesEnd("0");
-	comparison.ChannelMessageSeriesEnd("1");
+	comparison.ChannelMessageSeriesEnd(CHANNEL0);
+	comparison.ChannelMessageSeriesEnd(CHANNEL1);
 }
 
 void GunzipFile(const char *in, const char *out)

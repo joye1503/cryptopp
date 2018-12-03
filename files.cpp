@@ -71,7 +71,7 @@ lword FileStore::MaxRetrievable() const
 	return end-current;
 }
 
-size_t FileStore::TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel, bool blocking)
+size_t FileStore::TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel, bool blocking)
 {
 	if (!m_stream)
 	{
@@ -110,7 +110,7 @@ output:
 	return 0;
 }
 
-size_t FileStore::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, const std::string &channel, bool blocking) const
+size_t FileStore::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, ChannelId channel, bool blocking) const
 {
 	if (!m_stream)
 		return 0;

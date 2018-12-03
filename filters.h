@@ -67,8 +67,8 @@ public:
 	//@}
 
 	// See the documentation for BufferedTransformation in cryptlib.h
-	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true);
-	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true) const;
+	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true);
+	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true) const;
 
 	// See the documentation for BufferedTransformation in cryptlib.h
 	void Initialize(const NameValuePairs &parameters=g_nullNameValuePairs, int propagation=-1);
@@ -92,7 +92,7 @@ protected:
 	/// \param blocking specifies whether the object should block when processing input
 	/// \param channel the channel to process the data
 	/// \returns the number of bytes that remain in the block (i.e., bytes not processed)
-	size_t Output(int outputSite, const byte *inString, size_t length, int messageEnd, bool blocking, const std::string &channel=DEFAULT_CHANNEL);
+	size_t Output(int outputSite, const byte *inString, size_t length, int messageEnd, bool blocking, ChannelId channel=DEFAULT_CHANNEL);
 
 	/// \brief Output multiple bytes that may be modified by callee.
 	/// \param outputSite unknown, system crash between keyboard and chair...
@@ -102,7 +102,7 @@ protected:
 	/// \param blocking specifies whether the object should block when processing input
 	/// \param channel the channel to process the data
 	/// \returns the number of bytes that remain in the block (i.e., bytes not processed)
-	size_t OutputModifiable(int outputSite, byte *inString, size_t length, int messageEnd, bool blocking, const std::string &channel=DEFAULT_CHANNEL);
+	size_t OutputModifiable(int outputSite, byte *inString, size_t length, int messageEnd, bool blocking, ChannelId channel=DEFAULT_CHANNEL);
 
 	/// \brief Signals the end of messages to the object
 	/// \param outputSite unknown, system crash between keyboard and chair...
@@ -112,7 +112,7 @@ protected:
 	/// \returns TODO
 	/// \details propagation count includes this object. Setting  propagation to <tt>1</tt> means this
 	///   object only. Setting propagation to <tt>-1</tt> means unlimited propagation.
-	bool OutputMessageEnd(int outputSite, int propagation, bool blocking, const std::string &channel=DEFAULT_CHANNEL);
+	bool OutputMessageEnd(int outputSite, int propagation, bool blocking, ChannelId channel=DEFAULT_CHANNEL);
 
 	/// \brief Flush buffered input and/or output, with signal propagation
 	/// \param outputSite unknown, system crash between keyboard and chair...
@@ -131,7 +131,7 @@ protected:
 	///   stream that are created by hard flushes on the corresponding reverse filters, in this
 	///   example ZlibCompressor. This is useful when zlib compressed data is moved across a
 	///   network in packets and compression state is preserved across packets, as in the SSH2 protocol.
-	bool OutputFlush(int outputSite, bool hardFlush, int propagation, bool blocking, const std::string &channel=DEFAULT_CHANNEL);
+	bool OutputFlush(int outputSite, bool hardFlush, int propagation, bool blocking, ChannelId channel=DEFAULT_CHANNEL);
 
 	/// \brief Marks the end of a series of messages, with signal propagation
 	/// \param outputSite unknown, system crash between keyboard and chair...
@@ -144,7 +144,7 @@ protected:
 	/// \details propagation count includes this object. Setting  propagation to <tt>1</tt> means this
 	///   object only. Setting  propagation to <tt>-1</tt> means unlimited propagation.
 	/// \note There should be a MessageEnd() immediately before MessageSeriesEnd().
-	bool OutputMessageSeriesEnd(int outputSite, int propagation, bool blocking, const std::string &channel=DEFAULT_CHANNEL);
+	bool OutputMessageSeriesEnd(int outputSite, int propagation, bool blocking, ChannelId channel=DEFAULT_CHANNEL);
 
 private:
 	member_ptr<BufferedTransformation> m_attachment;
@@ -172,7 +172,7 @@ struct CRYPTOPP_DLL FilterPutSpaceHelper
 	///   "ChannelCreatePutSpace()" using \p desiredSize. If the target returns \p desiredSize with a size less
 	///   than \p minSize (i.e., the request could not be fulfilled), then an internal SecByteBlock
 	///   called \p m_tempSpace is resized and used for the caller.
-	byte *HelpCreatePutSpace(BufferedTransformation &target, const std::string &channel, size_t minSize, size_t desiredSize, size_t &bufferSize)
+	byte *HelpCreatePutSpace(BufferedTransformation &target, ChannelId channel, size_t minSize, size_t desiredSize, size_t &bufferSize)
 	{
 		CRYPTOPP_ASSERT(desiredSize >= minSize && bufferSize >= minSize);
 		if (m_tempSpace.size() < minSize)
@@ -194,8 +194,8 @@ struct CRYPTOPP_DLL FilterPutSpaceHelper
 	/// \param target the BufferedTransformation for the working space
 	/// \param channel channel for the working space
 	/// \param minSize minimum size of the allocation, in bytes
-	/// \details Internally, the overload calls HelpCreatePutSpace(BufferedTransformation &target, const std::string &channel, size_t minSize, size_t desiredSize, size_t &bufferSize) using \p minSize for missing arguments.
-	byte *HelpCreatePutSpace(BufferedTransformation &target, const std::string &channel, size_t minSize)
+	/// \details Internally, the overload calls HelpCreatePutSpace(BufferedTransformation &target, ChannelId channel, size_t minSize, size_t desiredSize, size_t &bufferSize) using \p minSize for missing arguments.
+	byte *HelpCreatePutSpace(BufferedTransformation &target, ChannelId channel, size_t minSize)
 		{return HelpCreatePutSpace(target, channel, minSize, minSize, minSize);}
 
 	/// \brief Create a working space in a BufferedTransformation
@@ -203,8 +203,8 @@ struct CRYPTOPP_DLL FilterPutSpaceHelper
 	/// \param channel channel for the working space
 	/// \param minSize minimum size of the allocation, in bytes
 	/// \param bufferSize the actual size of the allocation, in bytes
-	/// \details Internally, the overload calls HelpCreatePutSpace(BufferedTransformation &target, const std::string &channel, size_t minSize, size_t desiredSize, size_t &bufferSize) using \p minSize for missing arguments.
-	byte *HelpCreatePutSpace(BufferedTransformation &target, const std::string &channel, size_t minSize, size_t bufferSize)
+	/// \details Internally, the overload calls HelpCreatePutSpace(BufferedTransformation &target, ChannelId channel, size_t minSize, size_t desiredSize, size_t &bufferSize) using \p minSize for missing arguments.
+	byte *HelpCreatePutSpace(BufferedTransformation &target, ChannelId channel, size_t minSize, size_t bufferSize)
 		{return HelpCreatePutSpace(target, channel, minSize, minSize, bufferSize);}
 
 	/// \brief Temporay working space
@@ -559,7 +559,7 @@ public:
 	/// \param truncatedDigestSize the size of the digest
 	/// \param messagePutChannel the channel on which the message should be output
 	/// \param hashPutChannel the channel on which the digest should be output
-	HashFilter(HashTransformation &hm, BufferedTransformation *attachment = NULLPTR, bool putMessage=false, int truncatedDigestSize=-1, const std::string &messagePutChannel=DEFAULT_CHANNEL, const std::string &hashPutChannel=DEFAULT_CHANNEL);
+	HashFilter(HashTransformation &hm, BufferedTransformation *attachment = NULLPTR, bool putMessage=false, int truncatedDigestSize=-1, ChannelId messagePutChannel=DEFAULT_CHANNEL, ChannelId hashPutChannel=DEFAULT_CHANNEL);
 
 	std::string AlgorithmName() const {return m_hashModule.AlgorithmName();}
 	void IsolatedInitialize(const NameValuePairs &parameters);
@@ -571,7 +571,7 @@ private:
 	bool m_putMessage;
 	unsigned int m_digestSize;
 	byte *m_space;
-	std::string m_messagePutChannel, m_hashPutChannel;
+	ChannelId m_messagePutChannel, m_hashPutChannel;
 };
 
 /// \brief Filter wrapper for HashTransformation
@@ -655,11 +655,11 @@ public:
 	/// \param padding the \ref BlockPaddingSchemeDef "padding scheme"
 	/// \details <tt>truncatedDigestSize = -1</tt> indicates \ref HashTransformation::DigestSize() "DigestSize" should be used.
 	/// \since Crypto++ 5.6.0
-	AuthenticatedEncryptionFilter(AuthenticatedSymmetricCipher &c, BufferedTransformation *attachment = NULLPTR, bool putAAD=false, int truncatedDigestSize=-1, const std::string &macChannel=DEFAULT_CHANNEL, BlockPaddingScheme padding = DEFAULT_PADDING);
+	AuthenticatedEncryptionFilter(AuthenticatedSymmetricCipher &c, BufferedTransformation *attachment = NULLPTR, bool putAAD=false, int truncatedDigestSize=-1, ChannelId macChannel=DEFAULT_CHANNEL, BlockPaddingScheme padding = DEFAULT_PADDING);
 
 	void IsolatedInitialize(const NameValuePairs &parameters);
-	byte * ChannelCreatePutSpace(const std::string &channel, size_t &size);
-	size_t ChannelPut2(const std::string &channel, const byte *begin, size_t length, int messageEnd, bool blocking);
+	byte * ChannelCreatePutSpace(ChannelId channel, size_t &size);
+	size_t ChannelPut2(ChannelId channel, const byte *begin, size_t length, int messageEnd, bool blocking);
 
 	/// \brief Input the last block of data
 	/// \param inString the input byte buffer
@@ -713,8 +713,8 @@ public:
 	AuthenticatedDecryptionFilter(AuthenticatedSymmetricCipher &c, BufferedTransformation *attachment = NULLPTR, word32 flags = DEFAULT_FLAGS, int truncatedDigestSize=-1, BlockPaddingScheme padding = DEFAULT_PADDING);
 
 	std::string AlgorithmName() const {return m_hashVerifier.AlgorithmName();}
-	byte * ChannelCreatePutSpace(const std::string &channel, size_t &size);
-	size_t ChannelPut2(const std::string &channel, const byte *begin, size_t length, int messageEnd, bool blocking);
+	byte * ChannelCreatePutSpace(ChannelId channel, size_t &size);
+	size_t ChannelPut2(ChannelId channel, const byte *begin, size_t length, int messageEnd, bool blocking);
 	bool GetLastResult() const {return m_hashVerifier.GetLastResult();}
 
 protected:
@@ -893,7 +893,7 @@ public:
 	bool MessageSeriesEnd(int propagation=-1, bool blocking=true)
 		{return m_target && GetPassSignals() ? m_target->MessageSeriesEnd(propagation, blocking) : false;}
 
-	byte * ChannelCreatePutSpace(const std::string &channel, size_t &size)
+	byte * ChannelCreatePutSpace(ChannelId channel, size_t &size)
 	{
 		if (m_target)
 			return m_target->ChannelCreatePutSpace(channel, size);
@@ -903,13 +903,13 @@ public:
 			return NULLPTR;
 		}
 	}
-	size_t ChannelPut2(const std::string &channel, const byte *begin, size_t length, int messageEnd, bool blocking)
+	size_t ChannelPut2(ChannelId channel, const byte *begin, size_t length, int messageEnd, bool blocking)
 		{return m_target ? m_target->ChannelPut2(channel, begin, length, GetPassSignals() ? messageEnd : 0, blocking) : 0;}
-	size_t ChannelPutModifiable2(const std::string &channel, byte *begin, size_t length, int messageEnd, bool blocking)
+	size_t ChannelPutModifiable2(ChannelId channel, byte *begin, size_t length, int messageEnd, bool blocking)
 		{return m_target ? m_target->ChannelPutModifiable2(channel, begin, length, GetPassSignals() ? messageEnd : 0, blocking) : 0;}
-	bool ChannelFlush(const std::string &channel, bool completeFlush, int propagation=-1, bool blocking=true)
+	bool ChannelFlush(ChannelId channel, bool completeFlush, int propagation=-1, bool blocking=true)
 		{return m_target && GetPassSignals() ? m_target->ChannelFlush(channel, completeFlush, propagation, blocking) : false;}
-	bool ChannelMessageSeriesEnd(const std::string &channel, int propagation=-1, bool blocking=true)
+	bool ChannelMessageSeriesEnd(ChannelId channel, int propagation=-1, bool blocking=true)
 		{return m_target && GetPassSignals() ? m_target->ChannelMessageSeriesEnd(channel, propagation, blocking) : false;}
 
 	unsigned int GetMaxWaitObjectCount() const
@@ -955,15 +955,15 @@ public:
 	bool MessageSeriesEnd(int propagation=-1, bool blocking=true)
 		{return m_passSignal ? m_owner.AttachedTransformation()->MessageSeriesEnd(propagation, blocking) : false;}
 
-	byte * ChannelCreatePutSpace(const std::string &channel, size_t &size)
+	byte * ChannelCreatePutSpace(ChannelId channel, size_t &size)
 		{return m_owner.AttachedTransformation()->ChannelCreatePutSpace(channel, size);}
-	size_t ChannelPut2(const std::string &channel, const byte *begin, size_t length, int messageEnd, bool blocking)
+	size_t ChannelPut2(ChannelId channel, const byte *begin, size_t length, int messageEnd, bool blocking)
 		{return m_owner.AttachedTransformation()->ChannelPut2(channel, begin, length, m_passSignal ? messageEnd : 0, blocking);}
-	size_t ChannelPutModifiable2(const std::string &channel, byte *begin, size_t length, int messageEnd, bool blocking)
+	size_t ChannelPutModifiable2(ChannelId channel, byte *begin, size_t length, int messageEnd, bool blocking)
 		{return m_owner.AttachedTransformation()->ChannelPutModifiable2(channel, begin, length, m_passSignal ? messageEnd : 0, blocking);}
-	bool ChannelFlush(const std::string &channel, bool completeFlush, int propagation=-1, bool blocking=true)
+	bool ChannelFlush(ChannelId channel, bool completeFlush, int propagation=-1, bool blocking=true)
 		{return m_passSignal ? m_owner.AttachedTransformation()->ChannelFlush(channel, completeFlush, propagation, blocking) : false;}
-	bool ChannelMessageSeriesEnd(const std::string &channel, int propagation=-1, bool blocking=true)
+	bool ChannelMessageSeriesEnd(ChannelId channel, int propagation=-1, bool blocking=true)
 		{return m_passSignal ? m_owner.AttachedTransformation()->ChannelMessageSeriesEnd(channel, propagation, blocking) : false;}
 
 private:
@@ -1212,8 +1212,8 @@ public:
 	template <class T> StringStore(const T &string)
 		{StoreInitialize(MakeParameters("InputBuffer", ConstByteArrayParameter(string)));}
 
-	CRYPTOPP_DLL size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true);
-	CRYPTOPP_DLL size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true) const;
+	CRYPTOPP_DLL size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true);
+	CRYPTOPP_DLL size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true) const;
 
 private:
 	CRYPTOPP_DLL void StoreInitialize(const NameValuePairs &parameters);
@@ -1238,8 +1238,8 @@ public:
 	bool AnyRetrievable() const {return MaxRetrievable() != 0;}
 	lword MaxRetrievable() const {return m_length-m_count;}
 
-	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true);
-	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true) const
+	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true);
+	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true) const
 	{
 		CRYPTOPP_UNUSED(target); CRYPTOPP_UNUSED(begin); CRYPTOPP_UNUSED(end); CRYPTOPP_UNUSED(channel); CRYPTOPP_UNUSED(blocking);
 		throw NotImplemented("RandomNumberStore: CopyRangeTo2() is not supported by this store");
@@ -1261,8 +1261,8 @@ public:
 	void StoreInitialize(const NameValuePairs &parameters)
 		{CRYPTOPP_UNUSED(parameters);}
 	lword MaxRetrievable() const {return m_size;}
-	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true);
-	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true) const;
+	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true);
+	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true) const;
 
 private:
 	lword m_size;

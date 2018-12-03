@@ -112,7 +112,7 @@ public:
 		{return ChannelFlush(DEFAULT_CHANNEL, completeFlush, propagation, blocking);}
 	bool IsolatedFlush(bool hardFlush, bool blocking)
 		{CRYPTOPP_UNUSED(hardFlush); CRYPTOPP_UNUSED(blocking); CRYPTOPP_ASSERT(false); return false;}
-	bool ChannelFlush(const std::string &channel, bool hardFlush, int propagation=-1, bool blocking=true)
+	bool ChannelFlush(ChannelId channel, bool hardFlush, int propagation=-1, bool blocking=true)
 	{
 		if (hardFlush && !InputBufferIsEmpty())
 			throw CannotFlush("Unflushable<T>: this object has buffered input that cannot be flushed");
@@ -158,9 +158,9 @@ public:
 		{CRYPTOPP_UNUSED(hardFlush); CRYPTOPP_UNUSED(blocking); return false;}
 	bool IsolatedMessageSeriesEnd(bool blocking)
 		{CRYPTOPP_UNUSED(blocking); throw InputRejected();}
-	size_t ChannelPut2(const std::string &channel, const byte *inString, size_t length, int messageEnd, bool blocking)
+	size_t ChannelPut2(ChannelId channel, const byte *inString, size_t length, int messageEnd, bool blocking)
 		{CRYPTOPP_UNUSED(channel); CRYPTOPP_UNUSED(inString); CRYPTOPP_UNUSED(length); CRYPTOPP_UNUSED(messageEnd); CRYPTOPP_UNUSED(blocking); throw InputRejected();}
-	bool ChannelMessageSeriesEnd(const std::string& channel, int messageEnd, bool blocking)
+	bool ChannelMessageSeriesEnd(ChannelId channel, int messageEnd, bool blocking)
 		{CRYPTOPP_UNUSED(channel); CRYPTOPP_UNUSED(messageEnd); CRYPTOPP_UNUSED(blocking); throw InputRejected();}
 	//@}
 };
@@ -269,18 +269,18 @@ public:
 	size_t PutModifiable2(byte *inString, size_t length, int messageEnd, bool blocking)
 		{return this->ChannelPutModifiable2(DEFAULT_CHANNEL, inString, length, messageEnd, blocking);}
 
-//	void ChannelMessageSeriesEnd(const std::string &channel, int propagation=-1)
+//	void ChannelMessageSeriesEnd(ChannelId channel, int propagation=-1)
 //		{PropagateMessageSeriesEnd(propagation, channel);}
-	byte * ChannelCreatePutSpace(const std::string &channel, size_t &size)
+	byte * ChannelCreatePutSpace(ChannelId channel, size_t &size)
 		{CRYPTOPP_UNUSED(channel); size = 0; return NULLPTR;}
-	bool ChannelPutModifiable(const std::string &channel, byte *inString, size_t length)
+	bool ChannelPutModifiable(ChannelId channel, byte *inString, size_t length)
 		{this->ChannelPut(channel, inString, length); return false;}
 
-	virtual size_t ChannelPut2(const std::string &channel, const byte *begin, size_t length, int messageEnd, bool blocking) =0;
-	size_t ChannelPutModifiable2(const std::string &channel, byte *begin, size_t length, int messageEnd, bool blocking)
+	virtual size_t ChannelPut2(ChannelId channel, const byte *begin, size_t length, int messageEnd, bool blocking) =0;
+	size_t ChannelPutModifiable2(ChannelId channel, byte *begin, size_t length, int messageEnd, bool blocking)
 		{return ChannelPut2(channel, begin, length, messageEnd, blocking);}
 
-	virtual bool ChannelFlush(const std::string &channel, bool hardFlush, int propagation=-1, bool blocking=true) =0;
+	virtual bool ChannelFlush(ChannelId channel, bool hardFlush, int propagation=-1, bool blocking=true) =0;
 };
 
 /// \brief Provides auto signaling support
@@ -317,7 +317,7 @@ public:
 
 	unsigned int NumberOfMessages() const {return m_messageEnd ? 0 : 1;}
 	bool GetNextMessage();
-	unsigned int CopyMessagesTo(BufferedTransformation &target, unsigned int count=UINT_MAX, const std::string &channel=DEFAULT_CHANNEL) const;
+	unsigned int CopyMessagesTo(BufferedTransformation &target, unsigned int count=UINT_MAX, ChannelId channel=DEFAULT_CHANNEL) const;
 
 protected:
 	virtual void StoreInitialize(const NameValuePairs &parameters) =0;
@@ -337,9 +337,9 @@ protected:
 class CRYPTOPP_DLL CRYPTOPP_NO_VTABLE Sink : public BufferedTransformation
 {
 public:
-	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true)
+	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true)
 		{CRYPTOPP_UNUSED(target); CRYPTOPP_UNUSED(transferBytes); CRYPTOPP_UNUSED(channel); CRYPTOPP_UNUSED(blocking); transferBytes = 0; return 0;}
-	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true) const
+	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, ChannelId channel=DEFAULT_CHANNEL, bool blocking=true) const
 		{CRYPTOPP_UNUSED(target); CRYPTOPP_UNUSED(begin); CRYPTOPP_UNUSED(end); CRYPTOPP_UNUSED(channel); CRYPTOPP_UNUSED(blocking); return 0;}
 };
 

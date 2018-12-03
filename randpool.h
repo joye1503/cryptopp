@@ -46,7 +46,7 @@ public:
 
 	bool CanIncorporateEntropy() const {return true;}
 	void IncorporateEntropy(const byte *input, size_t length);
-	void GenerateIntoBufferedTransformation(BufferedTransformation &target, const std::string &channel, lword size);
+	void GenerateIntoBufferedTransformation(BufferedTransformation &target, ChannelId channel, lword size);
 
 private:
 	FixedSizeAlignedSecBlock<byte, 16, true> m_seed;
@@ -80,7 +80,7 @@ public:
 	// RandomNumberGenerator interface (Crypto++ 5.5 and above)
 	bool CanIncorporateEntropy() const {return true;}
 	void IncorporateEntropy(const byte *input, size_t length);
-	void GenerateIntoBufferedTransformation(BufferedTransformation &target, const std::string &channel, lword size);
+	void GenerateIntoBufferedTransformation(BufferedTransformation &target, ChannelId channel, lword size);
 
 	byte GenerateByte();
 	void GenerateBlock(byte *output, size_t size);

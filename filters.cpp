@@ -58,12 +58,12 @@ void Filter::Insert(Filter *filter)
 	m_attachment.reset(filter);
 }
 
-size_t Filter::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, const std::string &channel, bool blocking) const
+size_t Filter::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, ChannelId channel, bool blocking) const
 {
 	return AttachedTransformation()->CopyRangeTo2(target, begin, end, channel, blocking);
 }
 
-size_t Filter::TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel, bool blocking)
+size_t Filter::TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel, bool blocking)
 {
 	return AttachedTransformation()->TransferTo2(target, transferBytes, channel, blocking);
 }
@@ -115,7 +115,7 @@ void Filter::PropagateInitialize(const NameValuePairs &parameters, int propagati
 		AttachedTransformation()->Initialize(parameters, propagation-1);
 }
 
-size_t Filter::OutputModifiable(int outputSite, byte *inString, size_t length, int messageEnd, bool blocking, const std::string &channel)
+size_t Filter::OutputModifiable(int outputSite, byte *inString, size_t length, int messageEnd, bool blocking, ChannelId channel)
 {
 	if (messageEnd)
 		messageEnd--;
@@ -124,7 +124,7 @@ size_t Filter::OutputModifiable(int outputSite, byte *inString, size_t length, i
 	return result;
 }
 
-size_t Filter::Output(int outputSite, const byte *inString, size_t length, int messageEnd, bool blocking, const std::string &channel)
+size_t Filter::Output(int outputSite, const byte *inString, size_t length, int messageEnd, bool blocking, ChannelId channel)
 {
 	if (messageEnd)
 		messageEnd--;
@@ -133,7 +133,7 @@ size_t Filter::Output(int outputSite, const byte *inString, size_t length, int m
 	return result;
 }
 
-bool Filter::OutputFlush(int outputSite, bool hardFlush, int propagation, bool blocking, const std::string &channel)
+bool Filter::OutputFlush(int outputSite, bool hardFlush, int propagation, bool blocking, ChannelId channel)
 {
 	if (propagation && AttachedTransformation()->ChannelFlush(channel, hardFlush, propagation-1, blocking))
 	{
@@ -144,7 +144,7 @@ bool Filter::OutputFlush(int outputSite, bool hardFlush, int propagation, bool b
 	return false;
 }
 
-bool Filter::OutputMessageSeriesEnd(int outputSite, int propagation, bool blocking, const std::string &channel)
+bool Filter::OutputMessageSeriesEnd(int outputSite, int propagation, bool blocking, ChannelId channel)
 {
 	if (propagation && AttachedTransformation()->ChannelMessageSeriesEnd(channel, propagation-1, blocking))
 	{
@@ -851,7 +851,7 @@ void StreamTransformationFilter::LastPut(const byte *inString, size_t length)
 
 // *************************************************************
 
-HashFilter::HashFilter(HashTransformation &hm, BufferedTransformation *attachment, bool putMessage, int truncatedDigestSize, const std::string &messagePutChannel, const std::string &hashPutChannel)
+HashFilter::HashFilter(HashTransformation &hm, BufferedTransformation *attachment, bool putMessage, int truncatedDigestSize, ChannelId messagePutChannel, ChannelId hashPutChannel)
 	: m_hashModule(hm), m_putMessage(putMessage), m_digestSize(0), m_space(NULLPTR)
 	, m_messagePutChannel(messagePutChannel), m_hashPutChannel(hashPutChannel)
 {
@@ -947,7 +947,7 @@ void HashVerificationFilter::LastPut(const byte *inString, size_t length)
 // *************************************************************
 
 AuthenticatedEncryptionFilter::AuthenticatedEncryptionFilter(AuthenticatedSymmetricCipher &c, BufferedTransformation *attachment,
-								bool putAAD, int truncatedDigestSize, const std::string &macChannel, BlockPaddingScheme padding)
+								bool putAAD, int truncatedDigestSize, ChannelId macChannel, BlockPaddingScheme padding)
 	: StreamTransformationFilter(c, attachment, padding, true)
 	, m_hf(c, new OutputProxy(*this, false), putAAD, truncatedDigestSize, AAD_CHANNEL, macChannel)
 {
@@ -960,9 +960,9 @@ void AuthenticatedEncryptionFilter::IsolatedInitialize(const NameValuePairs &par
 	StreamTransformationFilter::IsolatedInitialize(parameters);
 }
 
-byte * AuthenticatedEncryptionFilter::ChannelCreatePutSpace(const std::string &channel, size_t &size)
+byte * AuthenticatedEncryptionFilter::ChannelCreatePutSpace(ChannelId channel, size_t &size)
 {
-	if (channel.empty())
+	if (IsDefaultChannel(channel))
 		return StreamTransformationFilter::CreatePutSpace(size);
 
 	if (channel == AAD_CHANNEL)
@@ -971,9 +971,9 @@ byte * AuthenticatedEncryptionFilter::ChannelCreatePutSpace(const std::string &c
 	throw InvalidChannelName("AuthenticatedEncryptionFilter", channel);
 }
 
-size_t AuthenticatedEncryptionFilter::ChannelPut2(const std::string &channel, const byte *begin, size_t length, int messageEnd, bool blocking)
+size_t AuthenticatedEncryptionFilter::ChannelPut2(ChannelId channel, const byte *begin, size_t length, int messageEnd, bool blocking)
 {
-	if (channel.empty())
+	if (IsDefaultChannel(channel))
 		return StreamTransformationFilter::Put2(begin, length, messageEnd, blocking);
 
 	if (channel == AAD_CHANNEL)
@@ -1011,9 +1011,9 @@ void AuthenticatedDecryptionFilter::InitializeDerivedAndReturnNewSizes(const Nam
 	lastSize = m_hashVerifier.m_lastSize;
 }
 
-byte * AuthenticatedDecryptionFilter::ChannelCreatePutSpace(const std::string &channel, size_t &size)
+byte * AuthenticatedDecryptionFilter::ChannelCreatePutSpace(ChannelId channel, size_t &size)
 {
-	if (channel.empty())
+	if (IsDefaultChannel(channel))
 		return m_streamFilter.CreatePutSpace(size);
 
 	if (channel == AAD_CHANNEL)
@@ -1022,9 +1022,9 @@ byte * AuthenticatedDecryptionFilter::ChannelCreatePutSpace(const std::string &c
 	throw InvalidChannelName("AuthenticatedDecryptionFilter", channel);
 }
 
-size_t AuthenticatedDecryptionFilter::ChannelPut2(const std::string &channel, const byte *begin, size_t length, int messageEnd, bool blocking)
+size_t AuthenticatedDecryptionFilter::ChannelPut2(ChannelId channel, const byte *begin, size_t length, int messageEnd, bool blocking)
 {
-	if (channel.empty())
+	if (IsDefaultChannel(channel))
 	{
 		if (m_lastSize > 0)
 			m_hashVerifier.ForceNextPut();
@@ -1170,7 +1170,7 @@ bool Store::GetNextMessage()
 		return false;
 }
 
-unsigned int Store::CopyMessagesTo(BufferedTransformation &target, unsigned int count, const std::string &channel) const
+unsigned int Store::CopyMessagesTo(BufferedTransformation &target, unsigned int count, ChannelId channel) const
 {
 	if (m_messageEnd || count == 0)
 		return 0;
@@ -1193,7 +1193,7 @@ void StringStore::StoreInitialize(const NameValuePairs &parameters)
 	m_count = 0;
 }
 
-size_t StringStore::TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel, bool blocking)
+size_t StringStore::TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel, bool blocking)
 {
 	lword position = 0;
 	size_t blockedBytes = CopyRangeTo2(target, position, transferBytes, channel, blocking);
@@ -1202,7 +1202,7 @@ size_t StringStore::TransferTo2(BufferedTransformation &target, lword &transferB
 	return blockedBytes;
 }
 
-size_t StringStore::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, const std::string &channel, bool blocking) const
+size_t StringStore::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, ChannelId channel, bool blocking) const
 {
 	size_t i = UnsignedMin(m_length, m_count+begin);
 	size_t len = UnsignedMin(m_length-i, end-begin);
@@ -1220,7 +1220,7 @@ void RandomNumberStore::StoreInitialize(const NameValuePairs &parameters)
 	m_length = length;
 }
 
-size_t RandomNumberStore::TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel, bool blocking)
+size_t RandomNumberStore::TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel, bool blocking)
 {
 	if (!blocking)
 		throw NotImplemented("RandomNumberStore: nonblocking transfer is not implemented by this object");
@@ -1232,7 +1232,7 @@ size_t RandomNumberStore::TransferTo2(BufferedTransformation &target, lword &tra
 	return 0;
 }
 
-size_t NullStore::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, const std::string &channel, bool blocking) const
+size_t NullStore::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, ChannelId channel, bool blocking) const
 {
 	static const byte nullBytes[128] = {0};
 	while (begin < end)
@@ -1246,7 +1246,7 @@ size_t NullStore::CopyRangeTo2(BufferedTransformation &target, lword &begin, lwo
 	return 0;
 }
 
-size_t NullStore::TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel, bool blocking)
+size_t NullStore::TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel, bool blocking)
 {
 	lword begin = 0;
 	size_t blockedBytes = NullStore::CopyRangeTo2(target, begin, transferBytes, channel, blocking);

@@ -31,11 +31,12 @@ public:
 	lword InputBuffered(word32 channelId) const;
 
 	void IsolatedInitialize(const NameValuePairs &parameters=g_nullNameValuePairs);
-	size_t ChannelPut2(const std::string &channel, const byte *begin, size_t length, int messageEnd, bool blocking)
+	size_t ChannelPut2(ChannelId channel, const byte *begin, size_t length, int messageEnd, bool blocking)
 	{
 		if (!blocking)
 			throw BlockingInputOnly("RawIDA");
-		ChannelData(StringToWord<word32>(channel), begin, length, messageEnd != 0);
+		// ChannelData(StringToWord<word32>(channel), begin, length, messageEnd != 0);
+		ChannelData(channel, begin, length, messageEnd != 0);
 		return 0;
 	}
 
@@ -54,7 +55,7 @@ protected:
 	InputChannelMap::iterator m_lastMapPosition;
 	std::vector<MessageQueue> m_inputQueues;
 	std::vector<word32> m_inputChannelIds, m_outputChannelIds, m_outputToInput;
-	std::vector<std::string> m_outputChannelIdStrings;
+	std::vector<ChannelId> m_outputChannelIdStrings;
 	std::vector<ByteQueue> m_outputQueues;
 	int m_threshold;
 	unsigned int m_channelsReady, m_channelsFinished;
@@ -132,7 +133,7 @@ public:
 protected:
 	RawIDA m_ida;
 	bool m_pad;
-	unsigned int m_nextChannel;
+	word32 m_nextChannel;
 };
 
 /// \brief Rabin's Information Dispersal Algorithm

@@ -13,7 +13,7 @@ MessageQueue::MessageQueue(unsigned int nodeSize)
 {
 }
 
-size_t MessageQueue::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, const std::string &channel, bool blocking) const
+size_t MessageQueue::CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end, ChannelId channel, bool blocking) const
 {
 	if (begin >= MaxRetrievable())
 		return 0;
@@ -21,7 +21,7 @@ size_t MessageQueue::CopyRangeTo2(BufferedTransformation &target, lword &begin, 
 	return m_queue.CopyRangeTo2(target, begin, STDMIN(MaxRetrievable(), end), channel, blocking);
 }
 
-size_t MessageQueue::TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel, bool blocking)
+size_t MessageQueue::TransferTo2(BufferedTransformation &target, lword &transferBytes, ChannelId channel, bool blocking)
 {
 	transferBytes = STDMIN(MaxRetrievable(), transferBytes);
 	size_t blockedBytes = m_queue.TransferTo2(target, transferBytes, channel, blocking);
@@ -42,7 +42,7 @@ bool MessageQueue::GetNextMessage()
 		return false;
 }
 
-unsigned int MessageQueue::CopyMessagesTo(BufferedTransformation &target, unsigned int count, const std::string &channel) const
+unsigned int MessageQueue::CopyMessagesTo(BufferedTransformation &target, unsigned int count, ChannelId channel) const
 {
 	ByteQueue::Walker walker(m_queue);
 	std::deque<lword>::const_iterator it = m_lengths.begin();
@@ -71,7 +71,7 @@ const byte * MessageQueue::Spy(size_t &contiguousSize) const
 
 // *************************************************************
 
-unsigned int EqualityComparisonFilter::MapChannel(const std::string &channel) const
+unsigned int EqualityComparisonFilter::MapChannel(ChannelId channel) const
 {
 	if (channel == m_firstChannel)
 		return 0;
@@ -81,7 +81,7 @@ unsigned int EqualityComparisonFilter::MapChannel(const std::string &channel) co
 		return 2;
 }
 
-size_t EqualityComparisonFilter::ChannelPut2(const std::string &channel, const byte *inString, size_t length, int messageEnd, bool blocking)
+size_t EqualityComparisonFilter::ChannelPut2(ChannelId channel, const byte *inString, size_t length, int messageEnd, bool blocking)
 {
 	if (!blocking)
 		throw BlockingInputOnly("EqualityComparisonFilter");
@@ -132,7 +132,7 @@ mismatch:
 	}
 }
 
-bool EqualityComparisonFilter::ChannelMessageSeriesEnd(const std::string &channel, int propagation, bool blocking)
+bool EqualityComparisonFilter::ChannelMessageSeriesEnd(ChannelId channel, int propagation, bool blocking)
 {
 	unsigned int i = MapChannel(channel);
 
