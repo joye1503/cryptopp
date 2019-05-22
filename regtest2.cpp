@@ -21,6 +21,7 @@
 #include "keccak.h"
 #include "sha.h"
 #include "sha3.h"
+#include "lsh.h"
 #include "blake2.h"
 #include "ripemd.h"
 #include "chacha.h"
@@ -65,6 +66,8 @@ void RegisterFactories2()
 	RegisterDefaultFactoryFor<MessageAuthenticationCode, HMAC<SHA256> >();
 	RegisterDefaultFactoryFor<MessageAuthenticationCode, HMAC<SHA384> >();
 	RegisterDefaultFactoryFor<MessageAuthenticationCode, HMAC<SHA512> >();
+	RegisterDefaultFactoryFor<MessageAuthenticationCode, HMAC<LSH256> >();
+	RegisterDefaultFactoryFor<MessageAuthenticationCode, HMAC<LSH512> >();
 	RegisterDefaultFactoryFor<MessageAuthenticationCode, TTMAC>();
 	RegisterDefaultFactoryFor<MessageAuthenticationCode, VMAC<AES> >();
 	RegisterDefaultFactoryFor<MessageAuthenticationCode, VMAC<AES, 64> >();
