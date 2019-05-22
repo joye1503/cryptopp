@@ -23,6 +23,7 @@ CP ?= cp
 MV ?= mv
 RM ?= rm -f
 GREP ?= grep
+SED ?= sed
 CHMOD ?= chmod
 MKDIR ?= mkdir -p
 
@@ -33,17 +34,17 @@ LDCONF ?= /sbin/ldconfig -n
 ifneq ($(wildcard /usr/xpg4/bin/grep),)
   GREP := /usr/xpg4/bin/grep
 endif
+ifneq ($(wildcard /usr/xpg4/bin/sed),)
+  SED := /usr/xpg4/bin/sed
+endif
 
-# Attempt to determine target machine, fallback to "this" machine.
-#   The target machine is the one the package runs on. Most people
-#   call this the "target", but not Autotools.
-HOSTX := $(shell $(CXX) $(CXXFLAGS) -dumpmachine 2>/dev/null | cut -f 1 -d '-')
 # Yet another Clang hack. I think the LLVM devs are making the shit up
 # as they go. Also see https://github.com/weidai11/cryptopp/issues/831.
-ifeq ($(HOSTX),armv8l-unknown-linux-gnueabihf)
-  HOSTX := armv7l-unknown-linux-gnueabihf
+MACHINEX := $(shell $(CXX) $(CXXFLAGS) -dumpmachine 2>/dev/null)
+ifeq ($(MACHINEX),armv8l-unknown-linux-gnueabihf)
+  MACHINEX := armv7l-unknown-linux-gnueabihf
 endif
-# Fallback
+HOSTX := $(shell echo $(MACHINEX) | cut -f 1 -d '-')
 ifeq ($(HOSTX),)
   HOSTX := $(shell uname -m 2>/dev/null)
 endif
@@ -163,6 +164,11 @@ else
   ZOPT = -O0
 endif
 
+# Fix CXX on Cygwin 1.1.4
+ifeq ($(CXX),gcc)
+CXX := g++
+endif
+
 # On ARM we may compile aes_armv4.S though the CC compiler
 ifeq ($(GCC_COMPILER),1)
   CC=gcc
@@ -189,18 +195,10 @@ ifeq ($(INCLUDEDIR),)
 INCLUDEDIR := $(PREFIX)/include
 endif
 
-# Fix CXX on Cygwin 1.1.4
-ifeq ($(CXX),gcc)
-CXX := g++
-endif
-
 # We honor ARFLAGS, but the "v" option used by default causes a noisy make
 ifeq ($(ARFLAGS),rv)
 ARFLAGS = r
 endif
-
-# Clang integrated assembler will be used with -Wa,-q
-CLANG_INTEGRATED_ASSEMBLER ?= 0
 
 # Original MinGW targets Win2k by default, but lacks proper Win2k support
 # if target Windows version is not specified, use Windows XP instead
@@ -1364,14 +1362,14 @@ endif
 .PHONY: trim
 trim:
 ifneq ($(IS_DARWIN),0)
-	sed -i '' -e's/[[:space:]]*$$//' *.supp *.txt *.sh .*.yml *.h *.cpp *.asm *.s *.S
-	sed -i '' -e's/[[:space:]]*$$//' *.sln *.vcxproj *.filters GNUmakefile GNUmakefile-cross
-	sed -i '' -e's/[[:space:]]*$$//' TestData/*.dat TestVectors/*.txt TestPrograms/*.cxx TestScripts/*.*
+	$(SED) -i '' -e's/[[:space:]]*$$//' *.supp *.txt *.sh .*.yml *.h *.cpp *.asm *.s *.S
+	$(SED) -i '' -e's/[[:space:]]*$$//' *.sln *.vcxproj *.filters GNUmakefile GNUmakefile-cross
+	$(SED) -i '' -e's/[[:space:]]*$$//' TestData/*.dat TestVectors/*.txt TestPrograms/*.cxx TestScripts/*.*
 	make convert
 else
-	sed -i -e's/[[:space:]]*$$//' *.supp *.txt *.sh .*.yml *.h *.cpp *.asm *.s *.S
-	sed -i -e's/[[:space:]]*$$//' *.sln *.vcxproj *.filters GNUmakefile GNUmakefile-cross
-	sed -i -e's/[[:space:]]*$$//' TestData/*.dat TestVectors/*.txt TestPrograms/*.cxx TestScripts/*.*
+	$(SED) -i -e's/[[:space:]]*$$//' *.supp *.txt *.sh .*.yml *.h *.cpp *.asm *.s *.S
+	$(SED) -i -e's/[[:space:]]*$$//' *.sln *.vcxproj *.filters GNUmakefile GNUmakefile-cross
+	$(SED) -i -e's/[[:space:]]*$$//' TestData/*.dat TestVectors/*.txt TestPrograms/*.cxx TestScripts/*.*
 	make convert
 endif
 
