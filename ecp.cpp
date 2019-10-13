@@ -61,7 +61,8 @@ struct ProjectivePoint
 struct AdditionFunction
 {
 	explicit AdditionFunction(const ECP::Field& field,
-		const ECP::FieldElement &a, const ECP::FieldElement &b, ECP::Point &r);
+		const ECP::FieldElement &a, const ECP::FieldElement &b,
+		const ECP::Point &id, ECP::Point &r);
 
 	// Double(P)
 	ECP::Point operator()(const ECP::Point& P) const;
@@ -86,6 +87,7 @@ protected:
 
 	const ECP::Field& field;
 	const ECP::FieldElement &a, &b;
+	const ECP::Point &id;
 	ECP::Point &R;
 
 	Alpha m_alpha;
@@ -108,8 +110,9 @@ protected:
 #define Z3 r.z
 
 AdditionFunction::AdditionFunction(const ECP::Field& field,
-	const ECP::FieldElement &a, const ECP::FieldElement &b, ECP::Point &r)
-	: field(field), a(a), b(b), R(r), m_alpha(static_cast<Alpha>(0))
+	const ECP::FieldElement &a, const ECP::FieldElement &b,
+  const ECP::Point &id, ECP::Point &r)
+	: field(field), a(a), b(b), id(id), R(r), m_alpha(static_cast<Alpha>(0))
 {
 	if (field.IsMontgomeryRepresentation())
 	{
@@ -272,7 +275,7 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 	}
 	else  // A_Montgomery
 	{
-		if (P.identity || P.y==field.Identity()) return ECP::Point();
+		if (P.identity || P.y==field.Identity()) return id;
 
 		ECP::FieldElement t = field.Square(P.x);
 		t = field.Add(field.Add(field.Double(t), t), a);
@@ -475,7 +478,7 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
     {
 			if (field.Equal(P.y, Q.y))
         return operator()(P);
-      return ECP::Point();
+      return id;
     }
 
 		ECP::FieldElement t = field.Subtract(Q.y, P.y);
@@ -714,7 +717,7 @@ const ECP::Point& ECP::Add(const Point &P, const Point &Q) const
 	if (GetField().Equal(P.x, Q.x))
 		return GetField().Equal(P.y, Q.y) ? Double(P) : Identity();
 
-	AdditionFunction add(GetField(), m_a, m_b, m_R);
+	AdditionFunction add(GetField(), m_a, m_b, Identity(), m_R);
 	return (m_R = add(P, Q));
 }
 
@@ -722,7 +725,7 @@ const ECP::Point& ECP::Double(const Point &P) const
 {
   if (P.identity || P.y==GetField().Identity()) return Identity();
 
-	AdditionFunction add(GetField(), m_a, m_b, m_R);
+	AdditionFunction add(GetField(), m_a, m_b, Identity(), m_R);
 	return (m_R = add(P));
 }
 
