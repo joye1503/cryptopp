@@ -272,22 +272,17 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 	}
 	else  // A_Montgomery
 	{
-		// More gyrations
-		bool identity = !!(P.identity + (P.y == field.Identity()));
+		if (P.identity || P.y==GetField().Identity()) return Identity();
 
-		ECP::FieldElement t = field.Square(P.x);
-		t = field.Add(field.Add(field.Double(t), t), a);
-		t = field.Divide(t, field.Double(P.y));
-		ECP::FieldElement x = field.Subtract(field.Subtract(field.Square(t), P.x), P.x);
-		R.y = field.Subtract(field.Multiply(t, field.Subtract(P.x, x)), P.y);
-		R.x.swap(x);
+		FieldElement t = GetField().Square(P.x);
+		t = GetField().Add(GetField().Add(GetField().Double(t), t), m_a);
+		t = GetField().Divide(t, GetField().Double(P.y));
+		FieldElement x = GetField().Subtract(GetField().Subtract(GetField().Square(t), P.x), P.x);
+		m_R.y = GetField().Subtract(GetField().Multiply(t, GetField().Subtract(P.x, x)), P.y);
 
-		// More gyrations
-		R.x *= IdentityToInteger(!identity);
-		R.y *= IdentityToInteger(!identity);
-		R.identity = identity;
-
-		return R;
+		m_R.x.swap(x);
+		m_R.identity = false;
+		return m_R;
 	}
 }
 
@@ -474,47 +469,19 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 	}
 	else  // A_Montgomery
 	{
-		// More gyrations
-		bool return_Q = P.identity;
-		bool return_P = Q.identity;
-		bool double_P = field.Equal(P.x, Q.x) && field.Equal(P.y, Q.y);
-		bool identity = field.Equal(P.x, Q.x) && !field.Equal(P.y, Q.y);
+		if (P.identity) return Q;
+		if (Q.identity) return P;
+		if (GetField().Equal(P.x, Q.x))
+			return GetField().Equal(P.y, Q.y) ? Double(P) : Identity();
 
-		// This code taken from Double(P) for below
-		identity = !!((double_P * (P.identity + (P.y == field.Identity()))) + identity);
+		FieldElement t = GetField().Subtract(Q.y, P.y);
+		t = GetField().Divide(t, GetField().Subtract(Q.x, P.x));
+		FieldElement x = GetField().Subtract(GetField().Subtract(GetField().Square(t), P.x), Q.x);
+		m_R.y = GetField().Subtract(GetField().Multiply(t, GetField().Subtract(P.x, x)), P.y);
 
-		ECP::Point S = R;
-		if (double_P)
-		{
-			// This code taken from Double(P)
-			ECP::FieldElement t = field.Square(P.x);
-			t = field.Add(field.Add(field.Double(t), t), a);
-			t = field.Divide(t, field.Double(P.y));
-			ECP::FieldElement x = field.Subtract(field.Subtract(field.Square(t), P.x), P.x);
-			R.y = field.Subtract(field.Multiply(t, field.Subtract(P.x, x)), P.y);
-			R.x.swap(x);
-		}
-		else
-		{
-			// Original Add(P,Q) code
-			ECP::FieldElement t = field.Subtract(Q.y, P.y);
-			t = field.Divide(t, field.Subtract(Q.x, P.x));
-			ECP::FieldElement x = field.Subtract(field.Subtract(field.Square(t), P.x), Q.x);
-			R.y = field.Subtract(field.Multiply(t, field.Subtract(P.x, x)), P.y);
-			R.x.swap(x);
-		}
-
-		// More gyrations
-		R.x = R.x * IdentityToInteger(!identity);
-		R.y = R.y * IdentityToInteger(!identity);
-		R.identity = identity;
-
-		if (return_Q)
-			return (R = S), Q;
-		else if (return_P)
-			return (R = S), P;
-		else
-			return (S = R), R;
+		m_R.x.swap(x);
+		m_R.identity = false;
+		return m_R;
 	}
 }
 
