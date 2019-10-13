@@ -1,4 +1,6 @@
 // ecp.cpp - originally written and placed in the public domain by Wei Dai
+//           Constant time add() and double() added by JW in July 2019.
+//           Also see https://github.com/weidai11/cryptopp/issues/869.
 
 #include "pch.h"
 
