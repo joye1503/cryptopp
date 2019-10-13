@@ -476,8 +476,11 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 		if (Q.identity) return P;
 		if (field.Equal(P.x, Q.x))
     {
+      ECP::Point p(P);
+      operator()(p);
+
 			if (field.Equal(P.y, Q.y))
-        return operator()(P);
+        return p;
       return id;
     }
 
