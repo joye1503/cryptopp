@@ -272,17 +272,17 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 	}
 	else  // A_Montgomery
 	{
-		if (P.identity || P.y==GetField().Identity()) return Identity();
+		if (P.identity || P.y==field.Identity()) return ECP::Point();
 
-		FieldElement t = GetField().Square(P.x);
-		t = GetField().Add(GetField().Add(GetField().Double(t), t), m_a);
-		t = GetField().Divide(t, GetField().Double(P.y));
-		FieldElement x = GetField().Subtract(GetField().Subtract(GetField().Square(t), P.x), P.x);
-		m_R.y = GetField().Subtract(GetField().Multiply(t, GetField().Subtract(P.x, x)), P.y);
+		ECP::FieldElement t = field.Square(P.x);
+		t = field.Add(field.Add(field.Double(t), t), a);
+		t = field.Divide(t, field.Double(P.y));
+		ECP::FieldElement x = field.Subtract(field.Subtract(field.Square(t), P.x), P.x);
+		R.y = field.Subtract(field.Multiply(t, field.Subtract(P.x, x)), P.y);
 
-		m_R.x.swap(x);
-		m_R.identity = false;
-		return m_R;
+		R.x.swap(x);
+		R.identity = false;
+		return R;
 	}
 }
 
@@ -471,17 +471,21 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 	{
 		if (P.identity) return Q;
 		if (Q.identity) return P;
-		if (GetField().Equal(P.x, Q.x))
-			return GetField().Equal(P.y, Q.y) ? Double(P) : Identity();
+		if (field.Equal(P.x, Q.x))
+    {
+			if (field.Equal(P.y, Q.y))
+        return operator()(P);
+      return ECP::Point();
+    }
 
-		FieldElement t = GetField().Subtract(Q.y, P.y);
-		t = GetField().Divide(t, GetField().Subtract(Q.x, P.x));
-		FieldElement x = GetField().Subtract(GetField().Subtract(GetField().Square(t), P.x), Q.x);
-		m_R.y = GetField().Subtract(GetField().Multiply(t, GetField().Subtract(P.x, x)), P.y);
+		ECP::FieldElement t = field.Subtract(Q.y, P.y);
+		t = field.Divide(t, field.Subtract(Q.x, P.x));
+		ECP::FieldElement x = field.Subtract(field.Subtract(field.Square(t), P.x), Q.x);
+		R.y = field.Subtract(field.Multiply(t, field.Subtract(P.x, x)), P.y);
 
-		m_R.x.swap(x);
-		m_R.identity = false;
-		return m_R;
+		R.x.swap(x);
+		R.identity = false;
+		return R;
 	}
 }
 
