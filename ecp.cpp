@@ -229,7 +229,6 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 
 		return R;
 	}
-#if 0
 	// Code path disabled at the moment due to https://github.com/weidai11/cryptopp/issues/878
 	else if (m_alpha == A_Star)
 	{
@@ -271,7 +270,6 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 
 		return R;
 	}
-#endif
 	else  // A_Montgomery
 	{
 		// More gyrations
@@ -407,7 +405,6 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 
 		return R;
 	}
-#if 0
 	// Code path disabled at the moment due to https://github.com/weidai11/cryptopp/issues/878
 	else if (m_alpha == A_Star)
 	{
@@ -475,7 +472,6 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 
 		return R;
 	}
-#endif
 	else  // A_Montgomery
 	{
 		// More gyrations
@@ -742,12 +738,19 @@ const ECP::Point& ECP::Inverse(const Point &P) const
 
 const ECP::Point& ECP::Add(const Point &P, const Point &Q) const
 {
+	if (P.identity) return Q;
+	if (Q.identity) return P;
+	if (GetField().Equal(P.x, Q.x))
+		return GetField().Equal(P.y, Q.y) ? Double(P) : Identity();
+
 	AdditionFunction add(GetField(), m_a, m_b, m_R);
 	return (m_R = add(P, Q));
 }
 
 const ECP::Point& ECP::Double(const Point &P) const
 {
+  if (P.identity || P.y==GetField().Identity()) return Identity();
+
 	AdditionFunction add(GetField(), m_a, m_b, m_R);
 	return (m_R = add(P));
 }
