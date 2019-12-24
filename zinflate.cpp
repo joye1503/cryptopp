@@ -1,7 +1,7 @@
 // zinflate.cpp - written and placed in the public domain by Wei Dai
 
 // This is a complete reimplementation of the DEFLATE decompression algorithm.
-// It should not be affected by any security vulnerabilities in the zlib 
+// It should not be affected by any security vulnerabilities in the zlib
 // compression library. In particular it is not affected by the double free bug
 // (http://www.kb.cert.org/vuls/id/368819).
 
@@ -118,7 +118,7 @@ void HuffmanDecoder::Initialize(const unsigned int *codeBits, unsigned int nCode
 	// compute a vector of <code, length, value> triples sorted by code
 	m_codeToValue.resize(nCodes - blCount[0]);
 	unsigned int j=0;
-	for (i=0; i<nCodes; i++) 
+	for (i=0; i<nCodes; i++)
 	{
 		unsigned int len = codeBits[i];
 		if (len != 0)
@@ -254,7 +254,7 @@ void Inflator::OutputString(const byte *string, size_t length)
 		}
 		string += len;
 		length -= len;
-	}		
+	}
 }
 
 void Inflator::OutputPast(unsigned int length, unsigned int distance)
@@ -590,7 +590,7 @@ struct NewFixedLiteralDecoder
 		std::fill(codeLengths + 144, codeLengths + 256, 9);
 		std::fill(codeLengths + 256, codeLengths + 280, 7);
 		std::fill(codeLengths + 280, codeLengths + 288, 8);
-		std::auto_ptr<HuffmanDecoder> pDecoder(new HuffmanDecoder);
+		member_ptr<HuffmanDecoder> pDecoder(new HuffmanDecoder);
 		pDecoder->Initialize(codeLengths, 288);
 		return pDecoder.release();
 	}
@@ -602,7 +602,7 @@ struct NewFixedDistanceDecoder
 	{
 		unsigned int codeLengths[32];
 		std::fill(codeLengths + 0, codeLengths + 32, 5);
-		std::auto_ptr<HuffmanDecoder> pDecoder(new HuffmanDecoder);
+		member_ptr<HuffmanDecoder> pDecoder(new HuffmanDecoder);
 		pDecoder->Initialize(codeLengths, 32);
 		return pDecoder.release();
 	}

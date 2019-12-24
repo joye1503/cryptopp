@@ -148,7 +148,7 @@ public:
 
 		//!
 		void Decode(const byte *input, size_t inputLen, Signedness=UNSIGNED);
-		//! 
+		//!
 		//* Precondition: bt.MaxRetrievable() >= inputLen
 		void Decode(BufferedTransformation &bt, size_t inputLen, Signedness=UNSIGNED);
 
@@ -162,7 +162,7 @@ public:
 
 		class OpenPGPDecodeErr : public Exception
 		{
-		public: 
+		public:
 			OpenPGPDecodeErr() : Exception(INVALID_DATA_FORMAT, "OpenPGP decode error") {}
 		};
 

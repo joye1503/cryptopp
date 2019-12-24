@@ -88,8 +88,8 @@ class EMSA5Pad : public PK_DeterministicSignatureMessageEncodingMethod
 {
 public:
 	static const char *StaticAlgorithmName() {return "EMSA5";}
-	
-	void ComputeMessageRepresentative(RandomNumberGenerator &rng, 
+
+	void ComputeMessageRepresentative(RandomNumberGenerator &rng,
 		const byte *recoverableMessage, size_t recoverableMessageLength,
 		HashTransformation &hash, HashIdentifier hashIdentifier, bool messageEmpty,
 		byte *representative, size_t representativeBitLength) const

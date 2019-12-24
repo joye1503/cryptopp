@@ -5,7 +5,7 @@
 
 NAMESPACE_BEGIN(CryptoPP)
 
-//! Base64 Encoder Class 
+//! Base64 Encoder Class
 class Base64Encoder : public SimpleProxyFilter
 {
 public:
@@ -18,7 +18,7 @@ public:
 	void IsolatedInitialize(const NameValuePairs &parameters);
 };
 
-//! Base64 Decoder Class 
+//! Base64 Decoder Class
 class Base64Decoder : public BaseN_Decoder
 {
 public:

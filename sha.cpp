@@ -423,7 +423,7 @@ static void CRYPTOPP_FASTCALL X86_SHA256_HashBlocks(word32 *state, const word32 
 
 #ifdef __GNUC__
 	".att_syntax prefix;"
-	: 
+	:
 	: "c" (state), "d" (data), "S" (SHA256_K+48), "D" (len)
 	#if CRYPTOPP_BOOL_X64
 		, "m" (workspace[0])
@@ -516,7 +516,7 @@ void SHA256::Transform(word32 *state, const word32 *data)
 #endif
 }
 
-/* 
+/*
 // smaller but slower
 void SHA256::Transform(word32 *state, const word32 *data)
 {
@@ -528,7 +528,7 @@ void SHA256::Transform(word32 *state, const word32 *data)
 	memcpy(t, state, 8*4);
 	word32 e = t[4], a = t[0];
 
-	do 
+	do
 	{
 		word32 w = data[j];
 		W[j] = w;

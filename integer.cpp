@@ -342,7 +342,7 @@ public:
 	hword GetLowHalf() const {return hword(m_whole);}
 	hword GetHighHalf() const {return hword(m_whole>>(WORD_BITS/2));}
 	hword GetHighHalfAsBorrow() const {return 0-hword(m_whole>>(WORD_BITS/2));}
-	
+
 private:
 	word m_whole;
 };
@@ -396,7 +396,7 @@ inline D DivideFourWordsByTwo(S *T, const D &Al, const D &Ah, const D &B)
 	{
 		S Q[2];
 		T[0] = Al.GetLowHalf();
-		T[1] = Al.GetHighHalf(); 
+		T[1] = Al.GetHighHalf();
 		T[2] = Ah.GetLowHalf();
 		T[3] = Ah.GetHighHalf();
 		Q[1] = DivideThreeWordsByTwo<S, D>(T+1, B.GetLowHalf(), B.GetHighHalf());
@@ -1003,7 +1003,7 @@ static word LinearMultiply(word *C, const word *A, word B, size_t N)
 	Mul_SaveAcc(13, 0, 14) Mul_Acc(1, 13) Mul_Acc(2, 12) Mul_Acc(3, 11) Mul_Acc(4, 10) Mul_Acc(5, 9) Mul_Acc(6, 8) Mul_Acc(7, 7) Mul_Acc(8, 6) Mul_Acc(9, 5) Mul_Acc(10, 4) Mul_Acc(11, 3) Mul_Acc(12, 2) Mul_Acc(13, 1) Mul_Acc(14, 0) \
 	Bot_SaveAcc(14, 0, 15) Bot_Acc(1, 14) Bot_Acc(2, 13) Bot_Acc(3, 12) Bot_Acc(4, 11) Bot_Acc(5, 10) Bot_Acc(6, 9) Bot_Acc(7, 8) Bot_Acc(8, 7) Bot_Acc(9, 6) Bot_Acc(10, 5) Bot_Acc(11, 4) Bot_Acc(12, 3) Bot_Acc(13, 2) Bot_Acc(14, 1) Bot_Acc(15, 0) \
 	Bot_End(16)
-	
+
 #endif
 
 #if 0
@@ -1382,7 +1382,7 @@ CRYPTOPP_ALIGN_DATA(16) static const word32 s_maskLow16[4] CRYPTOPP_SECTION_ALIG
 	AS2(	paddd		xmm6, xmm3)			\
 	AS2(	paddd		xmm7, xmm1)		\
 
-#define Squ_Acc1(i)		
+#define Squ_Acc1(i)
 #define Squ_Acc2(i)		ASC(call, LSqu##i)
 #define Squ_Acc3(i)		Squ_Acc2(i)
 #define Squ_Acc4(i)		Squ_Acc2(i)
@@ -1516,7 +1516,7 @@ CRYPTOPP_ALIGN_DATA(16) static const word32 s_maskLow16[4] CRYPTOPP_SECTION_ALIG
 	AS2(	paddd		xmm6, xmm3)			\
 	AS2(	paddd		xmm7, xmm1)		\
 
-#define Mul_Acc1(i)		
+#define Mul_Acc1(i)
 #define Mul_Acc2(i)		ASC(call, LMul##i)
 #define Mul_Acc3(i)		Mul_Acc2(i)
 #define Mul_Acc4(i)		Mul_Acc2(i)
@@ -3393,7 +3393,7 @@ std::ostream& operator<<(std::ostream& out, const Integer &a)
 	}
 
 	Integer temp1=a, temp2;
-    
+
 	if (a.IsNegative())
 	{
 		out << '-';

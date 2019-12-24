@@ -100,7 +100,7 @@ public:
 	bool ChannelMessageSeriesEnd(const std::string &channel, int propagation=-1, bool blocking=true);
 
 	byte * ChannelCreatePutSpace(const std::string &channel, size_t &size);
-	
+
 	void AddDefaultRoute(BufferedTransformation &destination);
 	void RemoveDefaultRoute(BufferedTransformation &destination);
 	void AddDefaultRoute(BufferedTransformation &destination, const std::string &outChannel);

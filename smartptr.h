@@ -35,13 +35,13 @@ public:
 		T *old_p = m_p;
 		m_p = 0;
 		return old_p;
-	} 
+	}
 
 	void reset(T *p = 0);
 
 protected:
-	member_ptr(const member_ptr<T>& rhs);		// copy not allowed
-	void operator=(const member_ptr<T>& rhs);	// assignment not allowed
+	member_ptr(const member_ptr<T>& rhs);		// no copy
+	void operator=(const member_ptr<T>& rhs);	// no assignment
 
 	T *m_p;
 };
@@ -124,7 +124,7 @@ private:
 };
 
 template <class T> counted_ptr<T>::counted_ptr(T *p)
-	: m_p(p) 
+	: m_p(p)
 {
 	if (m_p)
 		m_p->m_referenceCount = 1;

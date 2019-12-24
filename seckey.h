@@ -183,7 +183,7 @@ public:
 // ************** documentation ***************
 
 //! These objects usually should not be used directly. See CipherModeDocumentation instead.
-/*! Each class derived from this one defines two types, Encryption and Decryption, 
+/*! Each class derived from this one defines two types, Encryption and Decryption,
 	both of which implement the BlockCipher interface. */
 struct BlockCipherDocumentation
 {
@@ -193,7 +193,7 @@ struct BlockCipherDocumentation
 	typedef BlockCipher Decryption;
 };
 
-/*! \brief Each class derived from this one defines two types, Encryption and Decryption, 
+/*! \brief Each class derived from this one defines two types, Encryption and Decryption,
 	both of which implement the SymmetricCipher interface. Two types of classes derive
 	from this class: stream ciphers and block cipher modes. Stream ciphers can be used
 	alone, cipher mode classes need to be used with a block cipher. See CipherModeDocumentation
@@ -206,7 +206,7 @@ struct SymmetricCipherDocumentation
 	typedef SymmetricCipher Decryption;
 };
 
-/*! \brief Each class derived from this one defines two types, Encryption and Decryption, 
+/*! \brief Each class derived from this one defines two types, Encryption and Decryption,
 	both of which implement the AuthenticatedSymmetricCipher interface. */
 struct AuthenticatedSymmetricCipherDocumentation
 {

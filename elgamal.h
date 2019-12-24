@@ -6,8 +6,8 @@
 
 NAMESPACE_BEGIN(CryptoPP)
 
-class CRYPTOPP_NO_VTABLE ElGamalBase : public DL_KeyAgreementAlgorithm_DH<Integer, NoCofactorMultiplication>, 
-					public DL_KeyDerivationAlgorithm<Integer>, 
+class CRYPTOPP_NO_VTABLE ElGamalBase : public DL_KeyAgreementAlgorithm_DH<Integer, NoCofactorMultiplication>,
+					public DL_KeyDerivationAlgorithm<Integer>,
 					public DL_SymmetricEncryptionAlgorithm
 {
 public:

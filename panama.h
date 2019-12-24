@@ -115,7 +115,7 @@ struct PanamaCipherInfo : public FixedKeyLength<32, SimpleKeyingInterface::UNIQU
 
 //! _
 template <class B>
-class PanamaCipherPolicy : public AdditiveCipherConcretePolicy<word32, 8>, 
+class PanamaCipherPolicy : public AdditiveCipherConcretePolicy<word32, 8>,
 							public PanamaCipherInfo<B>,
 							protected Panama<B>
 {

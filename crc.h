@@ -32,7 +32,7 @@ public:
 
 private:
 	void Reset() {m_crc = CRC32_NEGL;}
-	
+
 	static const word32 m_tab[256];
 	word32 m_crc;
 };

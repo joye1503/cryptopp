@@ -453,7 +453,7 @@ byte ByteQueue::operator[](lword i) const
 	{
 		if (i < current->CurrentSize())
 			return (*current)[(size_t)i];
-		
+
 		i -= current->CurrentSize();
 	}
 

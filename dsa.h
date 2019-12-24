@@ -13,7 +13,7 @@ NAMESPACE_BEGIN(CryptoPP)
 enum DSASignatureFormat {DSA_P1363, DSA_DER, DSA_OPENPGP};
 /** This function converts between these formats, and returns length of signature in the target format.
 	If toFormat == DSA_P1363, bufferSize must equal publicKey.SignatureLength() */
-size_t DSAConvertSignatureFormat(byte *buffer, size_t bufferSize, DSASignatureFormat toFormat, 
+size_t DSAConvertSignatureFormat(byte *buffer, size_t bufferSize, DSASignatureFormat toFormat,
 	const byte *signature, size_t signatureLen, DSASignatureFormat fromFormat);
 
 #ifdef CRYPTOPP_MAINTAIN_BACKWARDS_COMPATIBILITY

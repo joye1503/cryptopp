@@ -39,7 +39,7 @@ public:
 	class Err : public Exception
 	{
 	public:
-		Err(const std::string &s) 
+		Err(const std::string &s)
 			: Exception(DATA_INTEGRITY_CHECK_FAILED, s) {}
 	};
 	class KeyBadErr : public Err {public: KeyBadErr() : Err("DefaultDecryptor: cannot decrypt message with this passphrase") {}};

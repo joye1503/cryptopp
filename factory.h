@@ -25,7 +25,7 @@ public:
 	{
 		return new ConcreteClass;
 	}
-	
+
 };
 
 //! _

@@ -100,9 +100,9 @@ public:
 
 	Element RandomElement( RandomNumberGenerator &rng , const RandomizationParameter &ignore_for_now = 0 ) const
 		// left RandomizationParameter arg as ref in case RandomizationParameter becomes a more complicated struct
-	{ 
-		return Element( rng , Integer( (long) 0) , m_modulus - Integer( (long) 1 )   ) ; 
-	}   
+	{
+		return Element( rng , Integer( (long) 0) , m_modulus - Integer( (long) 1 )   ) ;
+	}
 
 	bool operator==(const ModularArithmetic &rhs) const
 		{return m_modulus == rhs.m_modulus;}

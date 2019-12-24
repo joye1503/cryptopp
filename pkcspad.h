@@ -60,7 +60,7 @@ public:
 	size_t MinRepresentativeBitLength(size_t hashIdentifierSize, size_t digestSize) const
 		{return 8 * (digestSize + hashIdentifierSize + 10);}
 
-	void ComputeMessageRepresentative(RandomNumberGenerator &rng, 
+	void ComputeMessageRepresentative(RandomNumberGenerator &rng,
 		const byte *recoverableMessage, size_t recoverableMessageLength,
 		HashTransformation &hash, HashIdentifier hashIdentifier, bool messageEmpty,
 		byte *representative, size_t representativeBitLength) const;

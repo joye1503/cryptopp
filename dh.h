@@ -31,11 +31,11 @@ public:
 	template <class T2>
 	DH_Domain(RandomNumberGenerator &v1, const T2 &v2)
 		{m_groupParameters.Initialize(v1, v2);}
-	
+
 	template <class T2, class T3>
 	DH_Domain(RandomNumberGenerator &v1, const T2 &v2, const T3 &v3)
 		{m_groupParameters.Initialize(v1, v2, v3);}
-	
+
 	template <class T2, class T3, class T4>
 	DH_Domain(RandomNumberGenerator &v1, const T2 &v2, const T3 &v3, const T4 &v4)
 		{m_groupParameters.Initialize(v1, v2, v3, v4);}
@@ -43,11 +43,11 @@ public:
 	template <class T1, class T2>
 	DH_Domain(const T1 &v1, const T2 &v2)
 		{m_groupParameters.Initialize(v1, v2);}
-	
+
 	template <class T1, class T2, class T3>
 	DH_Domain(const T1 &v1, const T2 &v2, const T3 &v3)
 		{m_groupParameters.Initialize(v1, v2, v3);}
-	
+
 	template <class T1, class T2, class T3, class T4>
 	DH_Domain(const T1 &v1, const T2 &v2, const T3 &v3, const T4 &v4)
 		{m_groupParameters.Initialize(v1, v2, v3, v4);}

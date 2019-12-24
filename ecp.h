@@ -98,7 +98,7 @@ template<> class EcPrecomputation<ECP> : public DL_GroupPrecomputation<ECP::Poin
 {
 public:
 	typedef ECP EllipticCurve;
-	
+
 	// DL_GroupPrecomputation
 	bool NeedConversions() const {return true;}
 	Element ConvertIn(const Element &P) const

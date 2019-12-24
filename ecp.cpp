@@ -87,7 +87,7 @@ bool ECP::DecodePoint(ECP::Point &P, BufferedTransformation &bt, size_t encodedP
 		Integer p = FieldSize();
 
 		P.identity = false;
-		P.x.Decode(bt, GetField().MaxElementByteLength()); 
+		P.x.Decode(bt, GetField().MaxElementByteLength());
 		P.y = ((P.x*P.x+m_a)*P.x+m_b) % p;
 
 		if (Jacobi(P.y, p) !=1)

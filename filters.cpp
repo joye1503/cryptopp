@@ -317,11 +317,11 @@ bool FilterWithBufferedInput::IsolatedFlush(bool hardFlush, bool blocking)
 {
 	if (!blocking)
 		throw BlockingInputOnly("FilterWithBufferedInput");
-	
+
 	if (hardFlush)
 		ForceNextPut();
 	FlushDerived();
-	
+
 	return false;
 }
 
@@ -419,7 +419,7 @@ void FilterWithBufferedInput::ForceNextPut()
 {
 	if (!m_firstInputDone)
 		return;
-	
+
 	if (m_blockSize > 1)
 	{
 		while (m_queue.CurrentSize() >= m_blockSize)
@@ -476,7 +476,7 @@ void ProxyFilter::SetFilter(Filter *filter)
 	if (filter)
 	{
 		OutputProxy *proxy;
-		std::auto_ptr<OutputProxy> temp(proxy = new OutputProxy(*this, false));
+		member_ptr<OutputProxy> temp(proxy = new OutputProxy(*this, false));
 		m_filter->TransferAllTo(*proxy);
 		m_filter->Attach(temp.release());
 	}
@@ -622,7 +622,7 @@ void StreamTransformationFilter::NextPutModifiable(byte *inString, size_t length
 void StreamTransformationFilter::LastPut(const byte *inString, size_t length)
 {
 	byte *space = NULL;
-	
+
 	switch (m_padding)
 	{
 	case NO_PADDING:
@@ -806,7 +806,7 @@ void HashVerificationFilter::LastPut(const byte *inString, size_t length)
 
 // *************************************************************
 
-AuthenticatedEncryptionFilter::AuthenticatedEncryptionFilter(AuthenticatedSymmetricCipher &c, BufferedTransformation *attachment, 
+AuthenticatedEncryptionFilter::AuthenticatedEncryptionFilter(AuthenticatedSymmetricCipher &c, BufferedTransformation *attachment,
 								bool putAAD, int truncatedDigestSize, const std::string &macChannel, BlockPaddingScheme padding)
 	: StreamTransformationFilter(c, attachment, padding, true)
 	, m_hf(c, new OutputProxy(*this, false), putAAD, truncatedDigestSize, AAD_CHANNEL, macChannel)

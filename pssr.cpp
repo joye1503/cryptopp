@@ -27,7 +27,7 @@ size_t PSSR_MEM_Base::MaxRecoverableLength(size_t representativeBitLength, size_
 	return 0;
 }
 
-bool PSSR_MEM_Base::IsProbabilistic() const 
+bool PSSR_MEM_Base::IsProbabilistic() const
 {
 	return SaltLen(1) > 0;
 }
@@ -42,7 +42,7 @@ bool PSSR_MEM_Base::RecoverablePartFirst() const
 	return false;
 }
 
-void PSSR_MEM_Base::ComputeMessageRepresentative(RandomNumberGenerator &rng, 
+void PSSR_MEM_Base::ComputeMessageRepresentative(RandomNumberGenerator &rng,
 	const byte *recoverableMessage, size_t recoverableMessageLength,
 	HashTransformation &hash, HashIdentifier hashIdentifier, bool messageEmpty,
 	byte *representative, size_t representativeBitLength) const
@@ -112,7 +112,7 @@ DecodingResult PSSR_MEM_Base::RecoverMessageFromRepresentative(
 	byte *salt = representative + representativeByteLength - u - digestSize - saltSize;
 	byte *M = std::find_if(representative, salt-1, std::bind2nd(std::not_equal_to<byte>(), 0));
 	recoverableMessageLength = salt-M-1;
-	if (*M == 0x01 
+	if (*M == 0x01
 		&& (size_t)(M - representative - (representativeBitLength % 8 != 0)) >= MinPadLen(digestSize)
 		&& recoverableMessageLength <= MaxRecoverableLength(representativeBitLength, hashIdentifier.second, digestSize))
 	{
@@ -136,7 +136,7 @@ DecodingResult PSSR_MEM_Base::RecoverMessageFromRepresentative(
 
 	if (!AllowRecovery() && valid && recoverableMessageLength != 0)
 		{throw NotImplemented("PSSR_MEM: message recovery disabled");}
-	
+
 	return result;
 }
 

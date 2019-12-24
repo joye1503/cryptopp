@@ -28,11 +28,11 @@ public:
 	template <class T1, class T2>
 	MQV_Domain(T1 v1, T2 v2)
 		{m_groupParameters.Initialize(v1, v2);}
-	
+
 	template <class T1, class T2, class T3>
 	MQV_Domain(T1 v1, T2 v2, T3 v3)
 		{m_groupParameters.Initialize(v1, v2, v3);}
-	
+
 	template <class T1, class T2, class T3, class T4>
 	MQV_Domain(T1 v1, T2 v2, T3 v3, T4 v4)
 		{m_groupParameters.Initialize(v1, v2, v3, v4);}
@@ -78,7 +78,7 @@ public:
 	}
 
 	bool Agree(byte *agreedValue,
-		const byte *staticPrivateKey, const byte *ephemeralPrivateKey, 
+		const byte *staticPrivateKey, const byte *ephemeralPrivateKey,
 		const byte *staticOtherPublicKey, const byte *ephemeralOtherPublicKey,
 		bool validateStaticOtherPublicKey=true) const
 	{

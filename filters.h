@@ -48,7 +48,7 @@ protected:
 
 private:
 	member_ptr<BufferedTransformation> m_attachment;
-	
+
 protected:
 	size_t m_inputPosition;
 	int m_continueAt;
@@ -236,7 +236,7 @@ public:
 	{
 		if (!blocking)
 			throw BlockingInputOnly("FilterWithInputQueue");
-		
+
 		m_inQueue.Put(inString, length);
 		if (messageEnd)
 		{
@@ -606,7 +606,7 @@ public:
 		return 0;
 	}
 
-private:	
+private:
 	T *m_output;
 };
 
@@ -801,7 +801,7 @@ class CRYPTOPP_DLL RandomNumberSource : public SourceTemplate<RandomNumberStore>
 {
 public:
 	RandomNumberSource(RandomNumberGenerator &rng, int length, bool pumpAll, BufferedTransformation *attachment = NULL)
-		: SourceTemplate<RandomNumberStore>(attachment) 
+		: SourceTemplate<RandomNumberStore>(attachment)
 		{SourceInitialize(pumpAll, MakeParameters("RandomNumberGeneratorPointer", &rng)("RandomNumberStoreSize", length));}
 };
 

@@ -265,7 +265,7 @@ void OID::BERDecode(BufferedTransformation &bt)
 
 	if (!bt.Get(b))
 		BERDecodeError();
-	
+
 	length--;
 	m_values.resize(2);
 	m_values[0] = b / 40;
@@ -291,7 +291,7 @@ void OID::BERDecodeAndCheck(BufferedTransformation &bt) const
 
 inline BufferedTransformation & EncodedObjectFilter::CurrentTarget()
 {
-	if (m_flags & PUT_OBJECTS) 
+	if (m_flags & PUT_OBJECTS)
 		return *AttachedTransformation();
 	else
 		return TheBitBucket();

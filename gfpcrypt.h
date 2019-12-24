@@ -23,7 +23,7 @@ CRYPTOPP_DLL_TEMPLATE_CLASS DL_GroupParameters<Integer>;
 class CRYPTOPP_DLL CRYPTOPP_NO_VTABLE DL_GroupParameters_IntegerBased : public ASN1CryptoMaterial<DL_GroupParameters<Integer> >
 {
 	typedef DL_GroupParameters_IntegerBased ThisClass;
-	
+
 public:
 	void Initialize(const DL_GroupParameters_IntegerBased &params)
 		{Initialize(params.GetModulus(), params.GetSubgroupOrder(), params.GetSubgroupGenerator());}
@@ -43,7 +43,7 @@ public:
 	void GenerateRandom(RandomNumberGenerator &rng, const NameValuePairs &alg);
 	bool GetVoidValue(const char *name, const std::type_info &valueType, void *pValue) const;
 	void AssignFrom(const NameValuePairs &source);
-	
+
 	// DL_GroupParameters
 	const Integer & GetSubgroupOrder() const {return m_q;}
 	Integer GetGroupOrder() const {return GetFieldType() == 1 ? GetModulus()-Integer::One() : GetModulus()+Integer::One();}
@@ -343,8 +343,8 @@ public:
 //! <a href="http://www.weidai.com/scan-mirror/sig.html#DSA-1363">DSA-1363</a>
 template <class H>
 struct GDSA : public DL_SS<
-	DL_SignatureKeys_GFP, 
-	DL_Algorithm_GDSA<Integer>, 
+	DL_SignatureKeys_GFP,
+	DL_Algorithm_GDSA<Integer>,
 	DL_SignatureMessageEncodingMethod_DSA,
 	H>
 {
@@ -353,8 +353,8 @@ struct GDSA : public DL_SS<
 //! <a href="http://www.weidai.com/scan-mirror/sig.html#NR">NR</a>
 template <class H>
 struct NR : public DL_SS<
-	DL_SignatureKeys_GFP, 
-	DL_Algorithm_NR<Integer>, 
+	DL_SignatureKeys_GFP,
+	DL_Algorithm_NR<Integer>,
 	DL_SignatureMessageEncodingMethod_NR,
 	H>
 {
@@ -390,10 +390,10 @@ struct DL_Keys_DSA
 // class named DSA2 instead of DSA for backwards compatibility (DSA was a non-template class)
 template <class H>
 class DSA2 : public DL_SS<
-	DL_Keys_DSA, 
-	DL_Algorithm_GDSA<Integer>, 
+	DL_Keys_DSA,
+	DL_Algorithm_GDSA<Integer>,
 	DL_SignatureMessageEncodingMethod_DSA,
-	H, 
+	H,
 	DSA2<H> >
 {
 public:

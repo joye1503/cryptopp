@@ -137,7 +137,7 @@ void InvertibleESIGNFunction::DEREncode(BufferedTransformation &bt) const
 	privateKey.MessageEnd();
 }
 
-Integer InvertibleESIGNFunction::CalculateRandomizedInverse(RandomNumberGenerator &rng, const Integer &x) const 
+Integer InvertibleESIGNFunction::CalculateRandomizedInverse(RandomNumberGenerator &rng, const Integer &x) const
 {
 	DoQuickSanityCheck();
 

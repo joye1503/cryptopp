@@ -86,7 +86,7 @@ public:
 
 		//!
 		void Decode(const byte *input, size_t inputLen);
-		//! 
+		//!
 		//* Precondition: bt.MaxRetrievable() >= inputLen
 		void Decode(BufferedTransformation &bt, size_t inputLen);
 

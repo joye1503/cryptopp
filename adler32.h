@@ -5,7 +5,7 @@
 
 NAMESPACE_BEGIN(CryptoPP)
 
-//! ADLER-32 checksum calculations 
+//! ADLER-32 checksum calculations
 class Adler32 : public HashTransformation
 {
 public:

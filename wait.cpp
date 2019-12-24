@@ -144,7 +144,7 @@ void WaitObjectContainer::AddHandle(HANDLE handle, CallStack const& callStack)
 
 DWORD WINAPI WaitingThread(LPVOID lParam)
 {
-	std::auto_ptr<WaitingThreadData> pThread((WaitingThreadData *)lParam);
+	member_ptr<WaitingThreadData> pThread((WaitingThreadData *)lParam);
 	WaitingThreadData &thread = *pThread;
 	std::vector<HANDLE> handles;
 
@@ -241,7 +241,7 @@ bool WaitObjectContainer::Wait(unsigned long milliseconds)
 			throw Err("WaitObjectContainer: number of wait objects exceeds limit");
 		CreateThreads(nThreads);
 		DWORD error = S_OK;
-		
+
 		for (unsigned int i=0; i<m_threads.size(); i++)
 		{
 			WaitingThreadData &thread = *m_threads[i];

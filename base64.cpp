@@ -15,7 +15,7 @@ void Base64Encoder::IsolatedInitialize(const NameValuePairs &parameters)
 	int maxLineLength = parameters.GetIntValueWithDefault(Name::MaxLineLength(), 72);
 
 	const char *lineBreak = insertLineBreaks ? "\n" : "";
-	
+
 	m_filter->Initialize(CombinedNameValuePairs(
 		parameters,
 		MakeParameters(Name::EncodingLookupArray(), &s_vec[0], false)
