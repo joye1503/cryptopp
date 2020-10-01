@@ -187,7 +187,7 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 		// More gyrations
 		R.x = X3*Z3.NotZero();
 		R.y = Y3*Z3.NotZero();
-		// R.IsIdentity() = Z3.IsZero();
+		// R.identity = Z3.IsZero();
 		R.ChangeIdentity(Z3.IsZero());
 
 		return R;
@@ -228,6 +228,7 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 		// More gyrations
 		R.x = X3*Z3.NotZero();
 		R.y = Y3*Z3.NotZero();
+		// R.identity = Z3.IsZero();
 		R.ChangeIdentity(Z3.IsZero());
 
 		return R;
@@ -270,6 +271,7 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 		// More gyrations
 		R.x = X3*Z3.NotZero();
 		R.y = Y3*Z3.NotZero();
+		// R.identity = Z3.IsZero();
 		R.ChangeIdentity(Z3.IsZero());
 
 		return R;
@@ -290,7 +292,7 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 		// More gyrations
 		R.x *= IdentityToInteger(!identity);
 		R.y *= IdentityToInteger(!identity);
-		// R.IsIdentity() = identity;
+		// R.identity = identity;
 		R.ChangeIdentity(identity);
 
 		return R;
@@ -363,6 +365,7 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 		// More gyrations
 		R.x = X3*Z3.NotZero();
 		R.y = Y3*Z3.NotZero();
+		// R.identity = Z3.IsZero();
 		R.ChangeIdentity(Z3.IsZero());
 
 		return R;
@@ -407,6 +410,7 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 		// More gyrations
 		R.x = X3*Z3.NotZero();
 		R.y = Y3*Z3.NotZero();
+		// R.identity = Z3.IsZero();
 		R.ChangeIdentity(Z3.IsZero());
 
 		return R;
@@ -475,7 +479,8 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 		// More gyrations
 		R.x = X3*Z3.NotZero();
 		R.y = Y3*Z3.NotZero();
-		R.IsIdentity(Z3.IsZero());
+		// R.identity = Z3.IsZero();
+		R.ChangeIdentity(Z3.IsZero());
 
 		return R;
 	}
@@ -515,7 +520,7 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 		// More gyrations
 		R.x = R.x * IdentityToInteger(!identity);
 		R.y = R.y * IdentityToInteger(!identity);
-		// R.IsIdentity() = identity;
+		// R.identity = identity;
 		R.ChangeIdentity(identity);
 
 		if (return_Q)
@@ -599,7 +604,7 @@ bool ECP::DecodePoint(ECP::Point &P, BufferedTransformation &bt, size_t encodedP
 	switch (type)
 	{
 	case 0:
-		// P.IsIdentity() = true;
+		// P.identity = true;
 		P.MakeIdentity();
 		return true;
 	case 2:
@@ -610,7 +615,7 @@ bool ECP::DecodePoint(ECP::Point &P, BufferedTransformation &bt, size_t encodedP
 
 		Integer p = FieldSize();
 
-		// P.IsIdentity() = false;
+		// P.identity = false;
 		P.ChangeIdentity(false);
 		P.x.Decode(bt, GetField().MaxElementByteLength());
 		P.y = ((P.x*P.x+m_a)*P.x+m_b) % p;
@@ -631,7 +636,7 @@ bool ECP::DecodePoint(ECP::Point &P, BufferedTransformation &bt, size_t encodedP
 			return false;
 
 		unsigned int len = GetField().MaxElementByteLength();
-		// P.IsIdentity() = false;
+		// P.identity = false;
 		P.ChangeIdentity(false);
 		P.x.Decode(bt, len);
 		P.y.Decode(bt, len);
@@ -741,7 +746,7 @@ const ECP::Point& ECP::Inverse(const Point &P) const
 		return P;
 	else
 	{
-		// m_R.IsIdentity() = false;
+		// m_R.identity = false;
 		m_R.ChangeIdentity(false);
 
 		m_R.x = P.x;
@@ -947,12 +952,12 @@ void ECP::SimultaneousMultiply(ECP::Point *results, const ECP::Point &P, const I
 			ProjectivePoint &base = bases[baseIndices[i][j]];
 			if (base.z.IsZero())
 			{
-				// finalCascade[j].base.IsIdentity() = true;
+				// finalCascade[j].base.identity = true;
 				finalCascade[j].base.ChangeIdentity(true);
 			}
 			else
 			{
-				// finalCascade[j].base.IsIdentity() = false;
+				// finalCascade[j].base.identity = false;
 				finalCascade[j].base.ChangeIdentity(false);
 				finalCascade[j].base.x = base.x;
 				if (negateBase[i][j])

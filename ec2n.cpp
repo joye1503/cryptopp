@@ -73,7 +73,7 @@ bool EC2N::DecodePoint(EC2N::Point &P, BufferedTransformation &bt, size_t encode
 	switch (type)
 	{
 	case 0:
-		// P.IsIdentity() = true;
+		// P.identity = true;
 		P.MakeIdentity();
 		return true;
 	case 2:
@@ -82,7 +82,7 @@ bool EC2N::DecodePoint(EC2N::Point &P, BufferedTransformation &bt, size_t encode
 		if (encodedPointLen != EncodedPointSize(true))
 			return false;
 
-		// P.IsIdentity() = false;
+		// P.identity = false;
 		P.ChangeIdentity(false);
 		P.x.Decode(bt, m_field->MaxElementByteLength());
 
@@ -109,7 +109,7 @@ bool EC2N::DecodePoint(EC2N::Point &P, BufferedTransformation &bt, size_t encode
 			return false;
 
 		unsigned int len = m_field->MaxElementByteLength();
-		// P.IsIdentity() = false;
+		// P.identity = false;
 		P.ChangeIdentity(false);
 		P.x.Decode(bt, len);
 		P.y.Decode(bt, len);
@@ -216,7 +216,7 @@ const EC2N::Point& EC2N::Inverse(const Point &P) const
 		return P;
 	else
 	{
-		// m_R.IsIdentity() = false;
+		// m_R.identity = false;
 		m_R.ChangeIdentity(false);
 		m_R.y = m_field->Add(P.x, P.y);
 		m_R.x = P.x;
@@ -242,7 +242,7 @@ const EC2N::Point& EC2N::Add(const Point &P, const Point &Q) const
 	m_field->Accumulate(m_R.y, x);
 
 	m_R.x.swap(x);
-	// m_R.IsIdentity() = false;
+	// m_R.identity = false;
 	m_R.ChangeIdentity(false);
 
 	return m_R;
@@ -262,7 +262,7 @@ const EC2N::Point& EC2N::Double(const Point &P) const
 	m_field->Accumulate(m_R.y, m_field->Multiply(t, m_R.x));
 	m_field->Accumulate(m_R.y, m_R.x);
 
-	// m_R.IsIdentity() = false;
+	// m_R.identity = false;
 	m_R.ChangeIdentity(false);
 	return m_R;
 }
