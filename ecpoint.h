@@ -16,50 +16,69 @@
 NAMESPACE_BEGIN(CryptoPP)
 
 /// \brief Elliptical Curve Point over GF(p), where p is prime
-/// \since Crypto++ 2.0
+/// \details ECPPoint() and EC2NPoint were added at Crypto++ 2.0. The ECPPoint class
+///  used Cartesian coordinates with <tt>(x, y)</tt> members. At Crypto++ 8.3 the ECPPoint
+///  class switched to Projective coordinates with <tt>(x, y, z)</tt> members. Projective
+///  coordinates allow const-time ECP::Add() and ECP::Double().
+/// \details Under Projective coordinates the identity element is <tt>(0, 1, 0)</tt>.
+///  Other elements are <tt>(x, y, 1)</tt>.
+/// \since Crypto++ 2.0, Projective coordinates for ECP since Crypto++ 8.3
 struct CRYPTOPP_DLL ECPPoint
 {
 	virtual ~ECPPoint() {}
 
 	/// \brief Construct an ECPPoint
 	/// \details identity is set to <tt>true</tt>
-	ECPPoint() : identity(true) {}
+	/// \since Crypto++ 2.0
+	ECPPoint() : y(1), identity(true) {}
 
 	/// \brief Construct an ECPPoint from coordinates
 	/// \details identity is set to <tt>false</tt>
+	/// \since Crypto++ 2.0
 	ECPPoint(const Integer &x, const Integer &y)
-		: x(x), y(y), identity(false) {}
+		: x(x), y(y), z(1), identity(false) {}
+
+	/// \brief Construct an ECPPoint from coordinates
+	/// \details identity is set to <tt>false</tt>
+	/// \since Crypto++ 8.3
+	ECPPoint(const Integer &x, const Integer &y, const Integer &z)
+		: x(x), y(y), z(z), identity(false) {}
 
 	/// \brief Determine of the point is the identity element
 	/// \returns true if the point is the identity element, false otherwise
+	/// \since Crypto++ 8.3
 	bool IsIdentity() const
 		{return identity;}
 
 	/// \brief Make the element the identity element
+	/// \since Crypto++ 8.3
 	void MakeIdentity()
-		{identity = true; x = y = 0;}
+		{identity = true; x = z = 0, y = 1;}
 
 	/// \brief Change the element to/from identity element
 	/// \param value the new identity value
 	/// \details if <tt>value = true</tt>, then <tt>identity</tt> is set to <tt>true</tt>
-	///  and both <tt>x</tt> and <tt>y</tt> are set to 0. Otherwise, <tt>identity</tt>
-	///  is set to <tt>false</tt>.
+	///  and <tt>x = 0</tt>, <tt>y = 1</tt>, <tt>z = 0</tt>. Otherwise, <tt>identity</tt>
+	///  is set to <tt>false</tt> and <tt>z = 1</tt>.
+	/// \since Crypto++ 8.3
 	void ChangeIdentity(bool value)
-		{identity = value; if (identity) x = y = 0;}
+		{identity = value; if (identity) {x = z = 0, y = 1;} else {z = 1;}}
 
 	/// \brief Tests points for equality
 	/// \param t the other point
 	/// \returns true if the points are equal, false otherwise
+	/// \since Crypto++ 2.0
 	bool operator==(const ECPPoint &t) const
 		{return (IsIdentity() && t.IsIdentity()) || (!IsIdentity() && !t.IsIdentity() && x==t.x && y==t.y);}
 
 	/// \brief Tests points for ordering
 	/// \param t the other point
 	/// \returns true if this point is less than other, false otherwise
+	/// \since Crypto++ 2.0
 	bool operator< (const ECPPoint &t) const
 		{return IsIdentity() ? !t.IsIdentity() : (!t.IsIdentity() && (x<t.x || (x==t.x && y<t.y)));}
 
-	Integer x, y;
+	Integer x, y, z;
 
 protected:
 	bool identity;
@@ -75,19 +94,23 @@ struct CRYPTOPP_DLL EC2NPoint
 
 	/// \brief Construct an EC2NPoint
 	/// \details identity is set to <tt>true</tt>
+	/// \since Crypto++ 2.0
 	EC2NPoint() : identity(true) {}
 
 	/// \brief Construct an EC2NPoint from coordinates
 	/// \details identity is set to <tt>false</tt>
+	/// \since Crypto++ 2.0
 	EC2NPoint(const PolynomialMod2 &x, const PolynomialMod2 &y)
 		: x(x), y(y), identity(false) {}
 
 	/// \brief Determine of the point is the identity element
 	/// \returns true if the point is the identity element, false otherwise
+	/// \since Crypto++ 8.3
 	bool IsIdentity() const
 		{return identity;}
 
 	/// \brief Make the element the identity element
+	/// \since Crypto++ 8.3
 	void MakeIdentity()
 		{identity = true; x = y = 0;}
 
@@ -96,18 +119,21 @@ struct CRYPTOPP_DLL EC2NPoint
 	/// \details if <tt>value = true</tt>, then <tt>identity</tt> is set to <tt>true</tt>
 	///  and both <tt>x</tt> and <tt>y</tt> are set to 0. Otherwise, <tt>identity</tt>
 	///  is set to <tt>false</tt>.
+	/// \since Crypto++ 8.3
 	void ChangeIdentity(bool value)
 		{identity = value; if (identity) x = y = 0;}
 
 	/// \brief Tests points for equality
 	/// \param t the other point
 	/// \returns true if the points are equal, false otherwise
+	/// \since Crypto++ 2.0
 	bool operator==(const EC2NPoint &t) const
 		{return (IsIdentity() && t.IsIdentity()) || (!IsIdentity() && !t.IsIdentity() && x==t.x && y==t.y);}
 
 	/// \brief Tests points for ordering
 	/// \param t the other point
 	/// \returns true if this point is less than other, false otherwise
+	/// \since Crypto++ 2.0
 	bool operator< (const EC2NPoint &t) const
 		{return IsIdentity() ? !t.IsIdentity() : (!t.IsIdentity() && (x<t.x || (x==t.x && y<t.y)));}
 
@@ -122,7 +148,7 @@ CRYPTOPP_DLL_TEMPLATE_CLASS AbstractGroup<EC2NPoint>;
 /// \brief Abstract class for encoding and decoding ellicptic curve points
 /// \tparam Point ellicptic curve point
 /// \details EncodedPoint is an interface for encoding and decoding elliptic curve points.
-///   The template parameter <tt>Point</tt> should be a class like ECP or EC2N.
+///  The template parameter <tt>Point</tt> should be a class like ECP or EC2N.
 /// \since Crypto++ 6.0
 template <class Point>
 class EncodedPoint

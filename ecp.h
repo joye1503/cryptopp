@@ -30,6 +30,8 @@ public:
 	typedef Integer FieldElement;
 	typedef ECPPoint Point;
 
+	enum NistCurve {};
+
 	virtual ~ECP() {}
 
 	/// \brief Construct an ECP
@@ -50,7 +52,16 @@ public:
 	/// \param a Field::Element
 	/// \param b Field::Element
 	ECP(const Integer &modulus, const FieldElement &a, const FieldElement &b)
-		: m_fieldPtr(new Field(modulus)), m_a(a.IsNegative() ? modulus+a : a), m_b(b) {}
+		: m_fieldPtr(new Field(modulus)), m_a(a.IsNegative() ? modulus+a : a), m_b(b), m_nist(false) {}
+
+	/// \brief Construct an ECP
+	/// \param modulus the prime modulus
+	/// \param a Field::Element
+	/// \param b Field::Element
+	/// \param unused flag indicating a NIST curve
+	/// \details A NIST curve with <tt>a = -3</tt> can use an optimized ECP::Add() and ECP::Double() function.
+	ECP(const Integer &modulus, const FieldElement &a, const FieldElement &b, NistCurve unused)
+		: m_fieldPtr(new Field(modulus)), m_a(a.IsNegative() ? modulus+a : a), m_b(b), m_nist(true) {}
 
 	/// \brief Construct an ECP from BER encoded parameters
 	/// \param bt BufferedTransformation derived object
@@ -106,10 +117,16 @@ public:
 	bool operator==(const ECP &rhs) const
 		{return GetField() == rhs.GetField() && m_a == rhs.m_a && m_b == rhs.m_b;}
 
+protected:
+	// Optimized for NIST curves when a = -3
+	const Point& NistAdd(const Point &P, const Point &Q) const;
+	const Point& NistDouble(const Point &P) const;
+
 private:
 	clonable_ptr<Field> m_fieldPtr;
 	FieldElement m_a, m_b;
 	mutable Point m_R;
+	bool m_nist;
 };
 
 CRYPTOPP_DLL_TEMPLATE_CLASS DL_FixedBasePrecomputationImpl<ECP::Point>;
