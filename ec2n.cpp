@@ -1,4 +1,5 @@
 // ec2n.cpp - originally written and placed in the public domain by Wei Dai
+//            IsIdentity abstraction added by JW in October 2020.
 
 #include "pch.h"
 
@@ -72,7 +73,8 @@ bool EC2N::DecodePoint(EC2N::Point &P, BufferedTransformation &bt, size_t encode
 	switch (type)
 	{
 	case 0:
-		P.identity = true;
+		// P.IsIdentity() = true;
+		P.MakeIdentity();
 		return true;
 	case 2:
 	case 3:
@@ -80,7 +82,8 @@ bool EC2N::DecodePoint(EC2N::Point &P, BufferedTransformation &bt, size_t encode
 		if (encodedPointLen != EncodedPointSize(true))
 			return false;
 
-		P.identity = false;
+		// P.IsIdentity() = false;
+		P.ChangeIdentity(false);
 		P.x.Decode(bt, m_field->MaxElementByteLength());
 
 		if (P.x.IsZero())
@@ -106,7 +109,8 @@ bool EC2N::DecodePoint(EC2N::Point &P, BufferedTransformation &bt, size_t encode
 			return false;
 
 		unsigned int len = m_field->MaxElementByteLength();
-		P.identity = false;
+		// P.IsIdentity() = false;
+		P.ChangeIdentity(false);
 		P.x.Decode(bt, len);
 		P.y.Decode(bt, len);
 		return true;
@@ -118,7 +122,7 @@ bool EC2N::DecodePoint(EC2N::Point &P, BufferedTransformation &bt, size_t encode
 
 void EC2N::EncodePoint(BufferedTransformation &bt, const Point &P, bool compressed) const
 {
-	if (P.identity)
+	if (P.IsIdentity())
 		NullStore().TransferTo(bt, EncodedPointSize(compressed));
 	else if (compressed)
 	{
@@ -174,7 +178,7 @@ bool EC2N::ValidateParameters(RandomNumberGenerator &rng, unsigned int level) co
 bool EC2N::VerifyPoint(const Point &P) const
 {
 	const FieldElement &x = P.x, &y = P.y;
-	return P.identity ||
+	return P.IsIdentity() ||
 		(x.CoefficientCount() <= m_field->MaxElementBitLength()
 		&& y.CoefficientCount() <= m_field->MaxElementBitLength()
 		&& !(((x+m_a)*x*x+m_b-(x+y)*y)%m_field->GetModulus()));
@@ -182,13 +186,13 @@ bool EC2N::VerifyPoint(const Point &P) const
 
 bool EC2N::Equal(const Point &P, const Point &Q) const
 {
-	if (P.identity && Q.identity)
+	if (P.IsIdentity() && Q.IsIdentity())
 		return true;
 
-	if (P.identity && !Q.identity)
+	if (P.IsIdentity() && !Q.IsIdentity())
 		return false;
 
-	if (!P.identity && Q.identity)
+	if (!P.IsIdentity() && Q.IsIdentity())
 		return false;
 
 	return (m_field->Equal(P.x,Q.x) && m_field->Equal(P.y,Q.y));
@@ -208,11 +212,12 @@ const EC2N::Point& EC2N::Identity() const
 
 const EC2N::Point& EC2N::Inverse(const Point &P) const
 {
-	if (P.identity)
+	if (P.IsIdentity())
 		return P;
 	else
 	{
-		m_R.identity = false;
+		// m_R.IsIdentity() = false;
+		m_R.ChangeIdentity(false);
 		m_R.y = m_field->Add(P.x, P.y);
 		m_R.x = P.x;
 		return m_R;
@@ -221,8 +226,8 @@ const EC2N::Point& EC2N::Inverse(const Point &P) const
 
 const EC2N::Point& EC2N::Add(const Point &P, const Point &Q) const
 {
-	if (P.identity) return Q;
-	if (Q.identity) return P;
+	if (P.IsIdentity()) return Q;
+	if (Q.IsIdentity()) return P;
 	if (Equal(P, Q)) return Double(P);
 	if (m_field->Equal(P.x, Q.x) && m_field->Equal(P.y, m_field->Add(Q.x, Q.y))) return Identity();
 
@@ -237,13 +242,15 @@ const EC2N::Point& EC2N::Add(const Point &P, const Point &Q) const
 	m_field->Accumulate(m_R.y, x);
 
 	m_R.x.swap(x);
-	m_R.identity = false;
+	// m_R.IsIdentity() = false;
+	m_R.ChangeIdentity(false);
+
 	return m_R;
 }
 
 const EC2N::Point& EC2N::Double(const Point &P) const
 {
-	if (P.identity) return P;
+	if (P.IsIdentity()) return P;
 	if (!m_field->IsUnit(P.x)) return Identity();
 
 	FieldElement t = m_field->Divide(P.y, P.x);
@@ -255,7 +262,8 @@ const EC2N::Point& EC2N::Double(const Point &P) const
 	m_field->Accumulate(m_R.y, m_field->Multiply(t, m_R.x));
 	m_field->Accumulate(m_R.y, m_R.x);
 
-	m_R.identity = false;
+	// m_R.IsIdentity() = false;
+	m_R.ChangeIdentity(false);
 	return m_R;
 }
 

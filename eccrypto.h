@@ -130,7 +130,7 @@ public:
 	}
 	Integer ConvertElementToInteger(const Element &element) const;
 	Integer GetMaxExponent() const {return GetSubgroupOrder()-1;}
-	bool IsIdentity(const Element &element) const {return element.identity;}
+	bool IsIdentity(const Element &element) const {return element.IsIdentity();}
 	void SimultaneousExponentiate(Element *results, const Element &base, const Integer *exponents, unsigned int exponentsCount) const;
 	static std::string CRYPTOPP_API StaticAlgorithmNamePrefix() {return "EC";}
 

@@ -133,9 +133,9 @@ public:
 	// DL_GroupPrecomputation
 	bool NeedConversions() const {return true;}
 	Element ConvertIn(const Element &P) const
-		{return P.identity ? P : ECP::Point(m_ec->GetField().ConvertIn(P.x), m_ec->GetField().ConvertIn(P.y));};
+		{return P.IsIdentity() ? P : ECP::Point(m_ec->GetField().ConvertIn(P.x), m_ec->GetField().ConvertIn(P.y));};
 	Element ConvertOut(const Element &P) const
-		{return P.identity ? P : ECP::Point(m_ec->GetField().ConvertOut(P.x), m_ec->GetField().ConvertOut(P.y));}
+		{return P.IsIdentity() ? P : ECP::Point(m_ec->GetField().ConvertOut(P.x), m_ec->GetField().ConvertOut(P.y));}
 	const AbstractGroup<Element> & GetGroup() const {return *m_ec;}
 	Element BERDecodeElement(BufferedTransformation &bt) const {return m_ec->BERDecodePoint(bt);}
 	void DEREncodeElement(BufferedTransformation &bt, const Element &v) const {m_ec->DEREncodePoint(bt, v, false);}

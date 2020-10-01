@@ -30,19 +30,38 @@ struct CRYPTOPP_DLL ECPPoint
 	ECPPoint(const Integer &x, const Integer &y)
 		: x(x), y(y), identity(false) {}
 
+	/// \brief Determine of the point is the identity element
+	/// \returns true if the point is the identity element, false otherwise
+	bool IsIdentity() const
+		{return identity;}
+
+	/// \brief Make the element the identity element
+	void MakeIdentity()
+		{identity = true; x = y = 0;}
+
+	/// \brief Change the element to/from identity element
+	/// \param value the new identity value
+	/// \details if <tt>value = true</tt>, then <tt>identity</tt> is set to <tt>true</tt>
+	///  and both <tt>x</tt> and <tt>y</tt> are set to 0. Otherwise, <tt>identity</tt>
+	///  is set to <tt>false</tt>.
+	void ChangeIdentity(bool value)
+		{identity = value; if (identity) x = y = 0;}
+
 	/// \brief Tests points for equality
 	/// \param t the other point
 	/// \returns true if the points are equal, false otherwise
 	bool operator==(const ECPPoint &t) const
-		{return (identity && t.identity) || (!identity && !t.identity && x==t.x && y==t.y);}
+		{return (IsIdentity() && t.IsIdentity()) || (!IsIdentity() && !t.IsIdentity() && x==t.x && y==t.y);}
 
 	/// \brief Tests points for ordering
 	/// \param t the other point
 	/// \returns true if this point is less than other, false otherwise
 	bool operator< (const ECPPoint &t) const
-		{return identity ? !t.identity : (!t.identity && (x<t.x || (x==t.x && y<t.y)));}
+		{return IsIdentity() ? !t.IsIdentity() : (!t.IsIdentity() && (x<t.x || (x==t.x && y<t.y)));}
 
 	Integer x, y;
+
+protected:
 	bool identity;
 };
 
@@ -63,19 +82,38 @@ struct CRYPTOPP_DLL EC2NPoint
 	EC2NPoint(const PolynomialMod2 &x, const PolynomialMod2 &y)
 		: x(x), y(y), identity(false) {}
 
+	/// \brief Determine of the point is the identity element
+	/// \returns true if the point is the identity element, false otherwise
+	bool IsIdentity() const
+		{return identity;}
+
+	/// \brief Make the element the identity element
+	void MakeIdentity()
+		{identity = true; x = y = 0;}
+
+	/// \brief Change the element to/from identity element
+	/// \param value the new identity value
+	/// \details if <tt>value = true</tt>, then <tt>identity</tt> is set to <tt>true</tt>
+	///  and both <tt>x</tt> and <tt>y</tt> are set to 0. Otherwise, <tt>identity</tt>
+	///  is set to <tt>false</tt>.
+	void ChangeIdentity(bool value)
+		{identity = value; if (identity) x = y = 0;}
+
 	/// \brief Tests points for equality
 	/// \param t the other point
 	/// \returns true if the points are equal, false otherwise
 	bool operator==(const EC2NPoint &t) const
-		{return (identity && t.identity) || (!identity && !t.identity && x==t.x && y==t.y);}
+		{return (IsIdentity() && t.IsIdentity()) || (!IsIdentity() && !t.IsIdentity() && x==t.x && y==t.y);}
 
 	/// \brief Tests points for ordering
 	/// \param t the other point
 	/// \returns true if this point is less than other, false otherwise
 	bool operator< (const EC2NPoint &t) const
-		{return identity ? !t.identity : (!t.identity && (x<t.x || (x==t.x && y<t.y)));}
+		{return IsIdentity() ? !t.IsIdentity() : (!t.IsIdentity() && (x<t.x || (x==t.x && y<t.y)));}
 
 	PolynomialMod2 x, y;
+
+protected:
 	bool identity;
 };
 

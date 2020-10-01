@@ -1,4 +1,6 @@
 // ecp.cpp - originally written and placed in the public domain by Wei Dai
+//           const-timeness add and double added by JW in April 2019.
+//           IsIdentity abstraction added by JW in October 2020.
 
 #include "pch.h"
 
@@ -33,12 +35,12 @@ using CryptoPP::ModularArithmetic;
 
 inline ECP::Point ToMontgomery(const ModularArithmetic &mr, const ECP::Point &P)
 {
-	return P.identity ? P : ECP::Point(mr.ConvertIn(P.x), mr.ConvertIn(P.y));
+	return P.IsIdentity() ? P : ECP::Point(mr.ConvertIn(P.x), mr.ConvertIn(P.y));
 }
 
 inline ECP::Point FromMontgomery(const ModularArithmetic &mr, const ECP::Point &P)
 {
-	return P.identity ? P : ECP::Point(mr.ConvertOut(P.x), mr.ConvertOut(P.y));
+	return P.IsIdentity() ? P : ECP::Point(mr.ConvertOut(P.x), mr.ConvertOut(P.y));
 }
 
 inline Integer IdentityToInteger(bool val)
@@ -138,9 +140,9 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 	{
 		// Gyrations attempt to maintain constant-timeness
 		// We need either (P.x, P.y, 1) or (0, 1, 0).
-		const Integer x = P.x * IdentityToInteger(!P.identity);
-		const Integer y = P.y * IdentityToInteger(!P.identity) + 1 * IdentityToInteger(P.identity);
-		const Integer z = 1 * IdentityToInteger(!P.identity);
+		const Integer x = P.x * IdentityToInteger(!P.IsIdentity());
+		const Integer y = P.y * IdentityToInteger(!P.IsIdentity()) + 1 * IdentityToInteger(P.IsIdentity());
+		const Integer z = 1 * IdentityToInteger(!P.IsIdentity());
 
 		ProjectivePoint p(x, y, z), r;
 
@@ -185,7 +187,8 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 		// More gyrations
 		R.x = X3*Z3.NotZero();
 		R.y = Y3*Z3.NotZero();
-		R.identity = Z3.IsZero();
+		// R.IsIdentity() = Z3.IsZero();
+		R.ChangeIdentity(Z3.IsZero());
 
 		return R;
 	}
@@ -193,9 +196,9 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 	{
 		// Gyrations attempt to maintain constant-timeness
 		// We need either (P.x, P.y, 1) or (0, 1, 0).
-		const Integer x = P.x * IdentityToInteger(!P.identity);
-		const Integer y = P.y * IdentityToInteger(!P.identity) + 1 * IdentityToInteger(P.identity);
-		const Integer z = 1 * IdentityToInteger(!P.identity);
+		const Integer x = P.x * IdentityToInteger(!P.IsIdentity());
+		const Integer y = P.y * IdentityToInteger(!P.IsIdentity()) + 1 * IdentityToInteger(P.IsIdentity());
+		const Integer z = 1 * IdentityToInteger(!P.IsIdentity());
 
 		ProjectivePoint p(x, y, z), r;
 		const ECP::FieldElement b3 = field.Multiply(b, 3);
@@ -225,7 +228,7 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 		// More gyrations
 		R.x = X3*Z3.NotZero();
 		R.y = Y3*Z3.NotZero();
-		R.identity = Z3.IsZero();
+		R.ChangeIdentity(Z3.IsZero());
 
 		return R;
 	}
@@ -235,9 +238,9 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 	{
 		// Gyrations attempt to maintain constant-timeness
 		// We need either (P.x, P.y, 1) or (0, 1, 0).
-		const Integer x = P.x * IdentityToInteger(!P.identity);
-		const Integer y = P.y * IdentityToInteger(!P.identity) + 1 * IdentityToInteger(P.identity);
-		const Integer z = 1 * IdentityToInteger(!P.identity);
+		const Integer x = P.x * IdentityToInteger(!P.IsIdentity());
+		const Integer y = P.y * IdentityToInteger(!P.IsIdentity()) + 1 * IdentityToInteger(P.IsIdentity());
+		const Integer z = 1 * IdentityToInteger(!P.IsIdentity());
 
 		ProjectivePoint p(x, y, z), r;
 		const ECP::FieldElement b3 = field.Multiply(b, 3);
@@ -267,7 +270,7 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 		// More gyrations
 		R.x = X3*Z3.NotZero();
 		R.y = Y3*Z3.NotZero();
-		R.identity = Z3.IsZero();
+		R.ChangeIdentity(Z3.IsZero());
 
 		return R;
 	}
@@ -275,7 +278,7 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 	else  // A_Montgomery
 	{
 		// More gyrations
-		bool identity = !!(P.identity + (P.y == field.Identity()));
+		bool identity = !!(P.IsIdentity() + (P.y == field.Identity()));
 
 		ECP::FieldElement t = field.Square(P.x);
 		t = field.Add(field.Add(field.Double(t), t), a);
@@ -287,7 +290,8 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P) const
 		// More gyrations
 		R.x *= IdentityToInteger(!identity);
 		R.y *= IdentityToInteger(!identity);
-		R.identity = identity;
+		// R.IsIdentity() = identity;
+		R.ChangeIdentity(identity);
 
 		return R;
 	}
@@ -299,13 +303,13 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 	{
 		// Gyrations attempt to maintain constant-timeness
 		// We need either (P.x, P.y, 1) or (0, 1, 0).
-		const Integer x1 = P.x * IdentityToInteger(!P.identity);
-		const Integer y1 = P.y * IdentityToInteger(!P.identity) + 1 * IdentityToInteger(P.identity);
-		const Integer z1 = 1 * IdentityToInteger(!P.identity);
+		const Integer x1 = P.x * IdentityToInteger(!P.IsIdentity());
+		const Integer y1 = P.y * IdentityToInteger(!P.IsIdentity()) + 1 * IdentityToInteger(P.IsIdentity());
+		const Integer z1 = 1 * IdentityToInteger(!P.IsIdentity());
 
-		const Integer x2 = Q.x * IdentityToInteger(!Q.identity);
-		const Integer y2 = Q.y * IdentityToInteger(!Q.identity) + 1 * IdentityToInteger(Q.identity);
-		const Integer z2 = 1 * IdentityToInteger(!Q.identity);
+		const Integer x2 = Q.x * IdentityToInteger(!Q.IsIdentity());
+		const Integer y2 = Q.y * IdentityToInteger(!Q.IsIdentity()) + 1 * IdentityToInteger(Q.IsIdentity());
+		const Integer z2 = 1 * IdentityToInteger(!Q.IsIdentity());
 
 		ProjectivePoint p(x1, y1, z1), q(x2, y2, z2), r;
 
@@ -359,7 +363,7 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 		// More gyrations
 		R.x = X3*Z3.NotZero();
 		R.y = Y3*Z3.NotZero();
-		R.identity = Z3.IsZero();
+		R.ChangeIdentity(Z3.IsZero());
 
 		return R;
 	}
@@ -367,13 +371,13 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 	{
 		// Gyrations attempt to maintain constant-timeness
 		// We need either (P.x, P.y, 1) or (0, 1, 0).
-		const Integer x1 = P.x * IdentityToInteger(!P.identity);
-		const Integer y1 = P.y * IdentityToInteger(!P.identity) + 1 * IdentityToInteger(P.identity);
-		const Integer z1 = 1 * IdentityToInteger(!P.identity);
+		const Integer x1 = P.x * IdentityToInteger(!P.IsIdentity());
+		const Integer y1 = P.y * IdentityToInteger(!P.IsIdentity()) + 1 * IdentityToInteger(P.IsIdentity());
+		const Integer z1 = 1 * IdentityToInteger(!P.IsIdentity());
 
-		const Integer x2 = Q.x * IdentityToInteger(!Q.identity);
-		const Integer y2 = Q.y * IdentityToInteger(!Q.identity) + 1 * IdentityToInteger(Q.identity);
-		const Integer z2 = 1 * IdentityToInteger(!Q.identity);
+		const Integer x2 = Q.x * IdentityToInteger(!Q.IsIdentity());
+		const Integer y2 = Q.y * IdentityToInteger(!Q.IsIdentity()) + 1 * IdentityToInteger(Q.IsIdentity());
+		const Integer z2 = 1 * IdentityToInteger(!Q.IsIdentity());
 
 		ProjectivePoint p(x1, y1, z1), q(x2, y2, z2), r;
 		const ECP::FieldElement b3 = field.Multiply(b, 3);
@@ -403,7 +407,7 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 		// More gyrations
 		R.x = X3*Z3.NotZero();
 		R.y = Y3*Z3.NotZero();
-		R.identity = Z3.IsZero();
+		R.ChangeIdentity(Z3.IsZero());
 
 		return R;
 	}
@@ -413,13 +417,13 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 	{
 		// Gyrations attempt to maintain constant-timeness
 		// We need either (P.x, P.y, 1) or (0, 1, 0).
-		const Integer x1 = P.x * IdentityToInteger(!P.identity);
-		const Integer y1 = P.y * IdentityToInteger(!P.identity) + 1 * IdentityToInteger(P.identity);
-		const Integer z1 = 1 * IdentityToInteger(!P.identity);
+		const Integer x1 = P.x * IdentityToInteger(!P.IsIdentity());
+		const Integer y1 = P.y * IdentityToInteger(!P.IsIdentity()) + 1 * IdentityToInteger(P.IsIdentity());
+		const Integer z1 = 1 * IdentityToInteger(!P.IsIdentity());
 
-		const Integer x2 = Q.x * IdentityToInteger(!Q.identity);
-		const Integer y2 = Q.y * IdentityToInteger(!Q.identity) + 1 * IdentityToInteger(Q.identity);
-		const Integer z2 = 1 * IdentityToInteger(!Q.identity);
+		const Integer x2 = Q.x * IdentityToInteger(!Q.IsIdentity());
+		const Integer y2 = Q.y * IdentityToInteger(!Q.IsIdentity()) + 1 * IdentityToInteger(Q.IsIdentity());
+		const Integer z2 = 1 * IdentityToInteger(!Q.IsIdentity());
 
 		ProjectivePoint p(x1, y1, z1), q(x2, y2, z2), r;
 		const ECP::FieldElement b3 = field.Multiply(b, 3);
@@ -471,7 +475,7 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 		// More gyrations
 		R.x = X3*Z3.NotZero();
 		R.y = Y3*Z3.NotZero();
-		R.identity = Z3.IsZero();
+		R.IsIdentity(Z3.IsZero());
 
 		return R;
 	}
@@ -479,13 +483,13 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 	else  // A_Montgomery
 	{
 		// More gyrations
-		bool return_Q = P.identity;
-		bool return_P = Q.identity;
+		bool return_Q = P.IsIdentity();
+		bool return_P = Q.IsIdentity();
 		bool double_P = field.Equal(P.x, Q.x) && field.Equal(P.y, Q.y);
 		bool identity = field.Equal(P.x, Q.x) && !field.Equal(P.y, Q.y);
 
 		// This code taken from Double(P) for below
-		identity = !!((double_P * (P.identity + (P.y == field.Identity()))) + identity);
+		identity = !!((double_P * (P.IsIdentity() + (P.y == field.Identity()))) + identity);
 
 		ECP::Point S = R;
 		if (double_P)
@@ -511,7 +515,8 @@ ECP::Point AdditionFunction::operator()(const ECP::Point& P, const ECP::Point& Q
 		// More gyrations
 		R.x = R.x * IdentityToInteger(!identity);
 		R.y = R.y * IdentityToInteger(!identity);
-		R.identity = identity;
+		// R.IsIdentity() = identity;
+		R.ChangeIdentity(identity);
 
 		if (return_Q)
 			return (R = S), Q;
@@ -594,7 +599,8 @@ bool ECP::DecodePoint(ECP::Point &P, BufferedTransformation &bt, size_t encodedP
 	switch (type)
 	{
 	case 0:
-		P.identity = true;
+		// P.IsIdentity() = true;
+		P.MakeIdentity();
 		return true;
 	case 2:
 	case 3:
@@ -604,7 +610,8 @@ bool ECP::DecodePoint(ECP::Point &P, BufferedTransformation &bt, size_t encodedP
 
 		Integer p = FieldSize();
 
-		P.identity = false;
+		// P.IsIdentity() = false;
+		P.ChangeIdentity(false);
 		P.x.Decode(bt, GetField().MaxElementByteLength());
 		P.y = ((P.x*P.x+m_a)*P.x+m_b) % p;
 
@@ -624,7 +631,8 @@ bool ECP::DecodePoint(ECP::Point &P, BufferedTransformation &bt, size_t encodedP
 			return false;
 
 		unsigned int len = GetField().MaxElementByteLength();
-		P.identity = false;
+		// P.IsIdentity() = false;
+		P.ChangeIdentity(false);
 		P.x.Decode(bt, len);
 		P.y.Decode(bt, len);
 		return true;
@@ -636,7 +644,7 @@ bool ECP::DecodePoint(ECP::Point &P, BufferedTransformation &bt, size_t encodedP
 
 void ECP::EncodePoint(BufferedTransformation &bt, const Point &P, bool compressed) const
 {
-	if (P.identity)
+	if (P.IsIdentity())
 		NullStore().TransferTo(bt, EncodedPointSize(compressed));
 	else if (compressed)
 	{
@@ -696,20 +704,20 @@ bool ECP::VerifyPoint(const Point &P) const
 {
 	const FieldElement &x = P.x, &y = P.y;
 	Integer p = FieldSize();
-	return P.identity ||
+	return P.IsIdentity() ||
 		(!x.IsNegative() && x<p && !y.IsNegative() && y<p
 		&& !(((x*x+m_a)*x+m_b-y*y)%p));
 }
 
 bool ECP::Equal(const Point &P, const Point &Q) const
 {
-	if (P.identity && Q.identity)
+	if (P.IsIdentity() && Q.IsIdentity())
 		return true;
 
-	if (P.identity && !Q.identity)
+	if (P.IsIdentity() && !Q.IsIdentity())
 		return false;
 
-	if (!P.identity && Q.identity)
+	if (!P.IsIdentity() && Q.IsIdentity())
 		return false;
 
 	return (GetField().Equal(P.x,Q.x) && GetField().Equal(P.y,Q.y));
@@ -729,11 +737,13 @@ const ECP::Point& ECP::Identity() const
 
 const ECP::Point& ECP::Inverse(const Point &P) const
 {
-	if (P.identity)
+	if (P.IsIdentity())
 		return P;
 	else
 	{
-		m_R.identity = false;
+		// m_R.IsIdentity() = false;
+		m_R.ChangeIdentity(false);
+
 		m_R.x = P.x;
 		m_R.y = GetField().Inverse(P.y);
 		return m_R;
@@ -796,7 +806,7 @@ public:
 		: mr(m_mr)
 	{
 		CRYPTOPP_UNUSED(m_b);
-		if (Q.identity)
+		if (Q.IsIdentity())
 		{
 			sixteenY4 = P.x = P.y = mr.MultiplicativeIdentity();
 			aZ4 = P.z = mr.Identity();
@@ -936,10 +946,14 @@ void ECP::SimultaneousMultiply(ECP::Point *results, const ECP::Point &P, const I
 		{
 			ProjectivePoint &base = bases[baseIndices[i][j]];
 			if (base.z.IsZero())
-				finalCascade[j].base.identity = true;
+			{
+				// finalCascade[j].base.IsIdentity() = true;
+				finalCascade[j].base.ChangeIdentity(true);
+			}
 			else
 			{
-				finalCascade[j].base.identity = false;
+				// finalCascade[j].base.IsIdentity() = false;
+				finalCascade[j].base.ChangeIdentity(false);
 				finalCascade[j].base.x = base.x;
 				if (negateBase[i][j])
 					finalCascade[j].base.y = GetField().Inverse(base.y);
